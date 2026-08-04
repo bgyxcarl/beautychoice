@@ -148,7 +148,7 @@ button, .btn-primary, .btn-ghost { transition: background-color 0.25s ease, colo
 
 .btn-primary:hover { background: #2b2420 !important; color: #f8f4ef !important; }
 .btn-ghost { transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease; }
-.btn-ghost:hover { background: #fdfaf6; border-color: #fdfaf6 !important; color: #2b2420 !important; }
+.btn-ghost:hover { background: #f3ece1 !important; border-color: #2b2420 !important; color: #2b2420 !important; }
 
 .media-zoom { overflow: hidden; }
 .media-zoom img { transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }

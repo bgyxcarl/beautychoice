@@ -1,9 +1,11 @@
 import { CATEGORIES, UI_STRINGS } from './products-data.js';
 import { loadProducts } from './products-api.js';
-import { createOrder } from './orders-api.js';
+import { createOrder, loadOrders } from './orders-api.js';
 import { loadPayPalSdk, paypalConfigured } from './paypal.js';
 import { submitContactForm, formspreeConfigured } from './formspree.js';
 import { supabaseConfigured } from './supabase-client.js';
+import { getSession, onAuthStateChange, sendEmailCode, verifyEmailCode, signInWithGoogle, signOut, setMarketingOptIn } from './auth.js';
+import { TERMS_HTML, PRIVACY_HTML } from './legal-content.js';
 
 const app = document.getElementById('app');
 
@@ -25,6 +27,19 @@ const state = {
   contact: { name: '', email: '', message: '' },
   contactStatus: null, // 'sending' | 'sent' | 'error'
   mobileNavOpen: false,
+
+  session: null,
+  authEmail: '',
+  authCode: '',
+  authCodeSent: false,
+  authBusy: false,
+  authError: null,
+  marketingOptIn: false,
+  tosAgreed: true,
+
+  myOrders: [],
+  myOrdersLoading: false,
+  myOrdersError: null,
 };
 
 function esc(s) {
@@ -46,13 +61,14 @@ function goTo(page) {
   state.mobileNavOpen = false;
   render();
   window.scrollTo(0, 0);
+  if (page === 'account' && state.session) loadMyOrdersIntoState();
 }
 
 function nameFor(p) { return state.lang === 'zh' ? p.name : state.lang === 'en' ? p.nameEn : p.nameFr; }
 function descFor(p) { return state.lang === 'zh' ? p.descCn : state.lang === 'en' ? p.descEn : p.descFr; }
 function catLabelFor(p) { return state.lang === 'zh' ? p.categoryLabel : state.lang === 'en' ? p.categoryLabelEn : p.categoryLabelFr; }
 
-const SHIPPING_FLAT = 6;
+const SHIPPING_FLAT = 0; // TEMP: shipping disabled for testing — restore before real launch
 const FREE_SHIP_THRESHOLD = 80;
 
 function getDerived() {
@@ -145,6 +161,10 @@ function renderHeader(d) {
   const mobileNavItems = navBase.map((n) => `<div class="mobile-nav-item" data-action="goTo" data-page="${n.page}" style="color:${n.page === state.page ? '#c9a27a' : '#2b2420'};font-weight:${n.page === state.page ? 700 : 500};">${esc(n.label)}</div>`).join('');
   const langList = [{ key: 'zh', label: '中' }, { key: 'en', label: 'EN' }, { key: 'fr', label: 'FR' }];
   const langOptions = langList.map((l) => `<div data-action="setLang" data-lang="${l.key}" style="cursor:pointer;font-size:12px;padding:4px 8px;color:${l.key === state.lang ? '#c9a27a' : '#2b2420'};font-weight:${l.key === state.lang ? 700 : 500};border:1px solid ${l.key === state.lang ? '#c9a27a' : '#e3d9cc'};">${l.label}</div>`).join('');
+  const accountPage = state.session ? 'account' : 'login';
+  const accountLabel = state.session ? T('navAccount') : T('navLogin');
+  const accountLink = `<div data-action="goTo" data-page="${accountPage}" style="cursor:pointer;font-size:15px;color:${state.page === accountPage ? '#c9a27a' : '#2b2420'};font-weight:${state.page === accountPage ? 700 : 500};">${esc(accountLabel)}</div>`;
+  const mobileAccountLink = `<div class="mobile-nav-item" data-action="goTo" data-page="${accountPage}" style="color:${state.page === accountPage ? '#c9a27a' : '#2b2420'};font-weight:${state.page === accountPage ? 700 : 500};">${esc(accountLabel)}</div>`;
 
   return `
   <div style="background:#2b2420;color:#f1e9df;text-align:center;padding:10px 16px;font-size:13px;letter-spacing:0.02em;">
@@ -156,6 +176,7 @@ function renderHeader(d) {
       <div class="nav-desktop" style="gap:36px;">${navItems}</div>
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="lang-switch-desktop" style="gap:6px;">${langOptions}</div>
+        <div class="nav-desktop" style="gap:0;">${accountLink}</div>
         <div data-action="goTo" data-page="cart" style="cursor:pointer;position:relative;display:flex;align-items:center;gap:8px;font-size:15px;">
           <span>${T('cart')}</span>
           ${d.cartCount > 0 ? `<span style="background:#c9a27a;color:#231d19;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${d.cartCount}</span>` : ''}
@@ -165,6 +186,7 @@ function renderHeader(d) {
     </div>
     <div class="mobile-nav-panel${state.mobileNavOpen ? ' open' : ''}">
       ${mobileNavItems}
+      ${mobileAccountLink}
       <div class="mobile-lang-row">${langOptions}</div>
     </div>
   </div>`;
@@ -504,6 +526,110 @@ function renderContact() {
   </div>`;
 }
 
+function renderLogin() {
+  if (!supabaseConfigured) {
+    return `<div style="max-width:480px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);text-align:center;color:#8a4a3f;font-size:14px;">${T('loginNotConfigured')}</div>`;
+  }
+  if (state.session) {
+    return `<div style="max-width:480px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);"></div>`;
+  }
+  const agreeHtml = T('loginAgreeText', {
+    tos: `<a href="#" data-action="goTo" data-page="terms">${T('termsOfServiceLabel')}</a>`,
+    privacy: `<a href="#" data-action="goTo" data-page="privacy">${T('privacyPolicyLabel')}</a>`,
+  });
+  return `
+  <div style="max-width:420px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;text-align:center;">${T('loginTitle')}</div>
+    <div style="font-size:13px;color:#8a7f72;margin-top:10px;text-align:center;">${T('loginSubtitle')}</div>
+
+    <button class="btn-ghost" data-action="loginGoogle" ${state.authBusy || !state.tosAgreed ? 'disabled' : ''} style="width:100%;margin-top:32px;padding:14px 0;background:#fff;border:1px solid #2b2420;color:#2b2420;font-size:14px;font-weight:600;cursor:pointer;opacity:${!state.tosAgreed ? 0.5 : 1};">${T('loginWithGoogle')}</button>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:24px 0;color:#a89685;font-size:12px;">
+      <div style="flex:1;height:1px;background:#e3d9cc;"></div>${T('loginOr')}<div style="flex:1;height:1px;background:#e3d9cc;"></div>
+    </div>
+
+    ${!state.authCodeSent ? `
+      <input data-field="authEmail" type="email" value="${esc(state.authEmail)}" placeholder="${T('loginEmailPlaceholder')}" style="width:100%;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
+      <button class="btn-primary" data-action="sendCode" ${state.authBusy || !state.tosAgreed ? 'disabled' : ''} style="width:100%;margin-top:14px;padding:14px 0;background:#2b2420;color:#f8f4ef;border:none;font-size:14px;font-weight:600;cursor:pointer;opacity:${state.authBusy || !state.tosAgreed ? 0.6 : 1};">${T('loginSendCode')}</button>
+    ` : `
+      <div style="font-size:13px;color:#4a3f37;">${T('loginCodeSentHint', { email: esc(state.authEmail) })}</div>
+      <input data-field="authCode" inputmode="numeric" value="${esc(state.authCode)}" placeholder="${T('loginCodePlaceholder')}" style="width:100%;margin-top:14px;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;letter-spacing:0.2em;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
+      <button class="btn-primary" data-action="verifyCode" ${state.authBusy || !state.tosAgreed ? 'disabled' : ''} style="width:100%;margin-top:14px;padding:14px 0;background:#2b2420;color:#f8f4ef;border:none;font-size:14px;font-weight:600;cursor:pointer;opacity:${state.authBusy || !state.tosAgreed ? 0.6 : 1};">${T('loginVerify')}</button>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px;">
+        <a href="#" data-action="sendCode">${T('loginResend')}</a>
+        <a href="#" data-action="changeEmail">${T('loginChangeEmail')}</a>
+      </div>
+    `}
+
+    ${state.authError ? `<div style="margin-top:14px;font-size:13px;color:#8a4a3f;">${esc(state.authError)}</div>` : ''}
+
+    <div style="margin-top:28px;display:flex;flex-direction:column;gap:12px;">
+      <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#4a3f37;cursor:pointer;">
+        <input type="checkbox" data-field="marketingOptIn" ${state.marketingOptIn ? 'checked' : ''} style="margin-top:2px;" />
+        <span>${T('loginMarketingOptIn')}</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#4a3f37;cursor:pointer;">
+        <input type="checkbox" data-field="tosAgreed" ${state.tosAgreed ? 'checked' : ''} style="margin-top:2px;" />
+        <span>${agreeHtml}</span>
+      </label>
+    </div>
+  </div>`;
+}
+
+function renderAccount(d) {
+  if (!state.session) {
+    return `<div style="max-width:480px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);"></div>`;
+  }
+  const orders = state.myOrders;
+  return `
+  <div style="max-width:720px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('navAccount')}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-bottom:24px;border-bottom:1px solid #e3d9cc;flex-wrap:wrap;gap:12px;">
+      <div style="font-size:14px;color:#4a3f37;">${T('accountEmailLabel')}<br><strong>${esc(state.session.user.email)}</strong></div>
+      <button data-action="logout" style="padding:10px 20px;background:none;border:1px solid #e3d9cc;font-size:13px;cursor:pointer;">${T('logoutLabel')}</button>
+    </div>
+
+    <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;margin-top:36px;margin-bottom:20px;">${T('myOrdersTitle')}</div>
+    ${state.myOrdersLoading ? `<div style="color:#8a7f72;font-size:14px;">${T('loading')}</div>` : ''}
+    ${state.myOrdersError ? `<div style="color:#8a4a3f;font-size:14px;">${T('loadError')}</div>` : ''}
+    ${!state.myOrdersLoading && !state.myOrdersError && orders.length === 0 ? `<div style="color:#8a7f72;font-size:14px;">${T('noOrdersYet')}</div>` : ''}
+    ${orders.map((o) => {
+      const items = Array.isArray(o.items) ? o.items : [];
+      const summary = items.map((it) => `${esc(it.name)} × ${it.qty}`).join('、');
+      const shipped = o.status === 'shipped';
+      return `
+      <div style="border-bottom:1px solid #ece3d6;padding:18px 0;">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:13px;color:#8a7f72;">#${esc(String(o.id).slice(0, 8))} · ${fmtDate(o.created_at)}</div>
+          <div style="font-size:12px;color:${shipped ? '#6b8f6f' : '#8a7f72'};">${shipped ? T('orderStatusShipped') : T('orderStatusPending')}</div>
+        </div>
+        <div style="font-size:14px;color:#2b2420;margin-top:8px;">${summary}</div>
+        <div style="font-size:14px;color:#2b2420;margin-top:6px;">${fmtPrice(Number(o.total))}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function fmtDate(iso) {
+  try { return new Date(iso).toLocaleDateString(state.lang === 'zh' ? 'zh-CN' : state.lang === 'fr' ? 'fr-CA' : 'en-CA'); } catch { return iso; }
+}
+
+function legalPage(title, bodyHtml) {
+  return `
+  <div style="max-width:760px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${title}</div>
+    <div style="font-size:14px;line-height:1.9;color:#4a3f37;margin-top:32px;">${bodyHtml}</div>
+  </div>`;
+}
+
+function renderTerms() {
+  return legalPage(T('termsOfServiceLabel'), TERMS_HTML);
+}
+
+function renderPrivacy() {
+  return legalPage(T('privacyPolicyLabel'), PRIVACY_HTML);
+}
+
 function renderReviews(d) {
   return `
   <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
@@ -546,8 +672,12 @@ function renderFooter() {
         <div style="font-size:14px;">${T('footerPaymentValue')}</div>
       </div>
     </div>
-    <div style="max-width:1280px;margin:40px auto 0;border-top:1px solid #4a4038;padding-top:24px;font-size:12px;color:#8a7f72;">
-      ${T('footerCopyright')}
+    <div style="max-width:1280px;margin:40px auto 0;border-top:1px solid #4a4038;padding-top:24px;font-size:12px;color:#8a7f72;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;">
+      <span>${T('footerCopyright')}</span>
+      <span style="display:flex;gap:16px;">
+        <a href="#" data-action="goTo" data-page="terms" style="color:#8a7f72;">${T('termsOfServiceLabel')}</a>
+        <a href="#" data-action="goTo" data-page="privacy" style="color:#8a7f72;">${T('privacyPolicyLabel')}</a>
+      </span>
     </div>
   </div>`;
 }
@@ -574,6 +704,7 @@ function render() {
   const pageHtml = {
     home: renderHome, shop: renderShop, product: renderProduct, cart: renderCart,
     checkout: renderCheckout, about: renderAbout, contact: renderContact, reviews: renderReviews,
+    login: renderLogin, account: renderAccount, terms: renderTerms, privacy: renderPrivacy,
   }[state.page](d);
 
   app.innerHTML = `
@@ -640,6 +771,7 @@ function mountPayPalButtons() {
         try {
           const orderRecord = await createOrder({
             paypalOrderId: data.orderID,
+            userId: state.session ? state.session.user.id : null,
             name: state.shipping.name,
             email: state.shipping.email,
             address: state.shipping.address,
@@ -705,6 +837,83 @@ function addToCart() {
   toastTimer = setTimeout(() => { state.addedToast = false; render(); }, 1800);
 }
 
+async function loginGoogle() {
+  state.authError = null;
+  try {
+    await signInWithGoogle();
+  } catch (e) {
+    console.error('Google sign-in failed:', e);
+    state.authError = T('loginGenericError');
+    render();
+  }
+}
+
+async function sendCode() {
+  const email = state.authEmail.trim();
+  if (!email) return;
+  state.authBusy = true;
+  state.authError = null;
+  render();
+  try {
+    await sendEmailCode(email);
+    state.authCodeSent = true;
+  } catch (e) {
+    console.error('Failed to send login code:', e);
+    state.authError = T('loginGenericError');
+  }
+  state.authBusy = false;
+  render();
+}
+
+async function verifyCode() {
+  const email = state.authEmail.trim();
+  const code = state.authCode.trim();
+  if (!email || !code) return;
+  state.authBusy = true;
+  state.authError = null;
+  render();
+  try {
+    const session = await verifyEmailCode(email, code);
+    state.session = session;
+    try { await setMarketingOptIn(state.marketingOptIn); } catch (e) { console.error('Failed to save marketing preference:', e); }
+    state.authCode = '';
+    state.authCodeSent = false;
+    goTo('account');
+  } catch (e) {
+    console.error('Failed to verify code:', e);
+    state.authError = T('loginGenericError');
+  }
+  state.authBusy = false;
+  render();
+}
+
+function changeEmail() {
+  state.authCodeSent = false;
+  state.authCode = '';
+  state.authError = null;
+  render();
+}
+
+async function logout() {
+  await signOut();
+  state.session = null;
+  goTo('home');
+}
+
+async function loadMyOrdersIntoState() {
+  state.myOrdersLoading = true;
+  state.myOrdersError = null;
+  render();
+  try {
+    state.myOrders = await loadOrders();
+  } catch (e) {
+    console.error('Failed to load my orders:', e);
+    state.myOrdersError = e;
+  }
+  state.myOrdersLoading = false;
+  render();
+}
+
 async function sendMessage() {
   const c = state.contact;
   if (!c.name.trim() || !c.email.trim() || !c.message.trim()) return;
@@ -741,6 +950,11 @@ app.addEventListener('click', (e) => {
     case 'cartDec': { const i = Number(el.dataset.index); state.cart[i].qty = Math.max(1, state.cart[i].qty - 1); render(); break; }
     case 'cartRemove': { const i = Number(el.dataset.index); state.cart.splice(i, 1); render(); break; }
     case 'sendMessage': sendMessage(); break;
+    case 'loginGoogle': loginGoogle(); break;
+    case 'sendCode': sendCode(); break;
+    case 'verifyCode': verifyCode(); break;
+    case 'changeEmail': changeEmail(); break;
+    case 'logout': logout(); break;
   }
 });
 
@@ -750,7 +964,15 @@ app.addEventListener('input', (e) => {
   if (field === 'contactName') state.contact.name = e.target.value;
   else if (field === 'contactEmail') state.contact.email = e.target.value;
   else if (field === 'contactMessage') state.contact.message = e.target.value;
+  else if (field === 'authEmail') state.authEmail = e.target.value;
+  else if (field === 'authCode') state.authCode = e.target.value;
   else state.shipping[field] = e.target.value;
+});
+
+app.addEventListener('change', (e) => {
+  const field = e.target.dataset.field;
+  if (field === 'marketingOptIn') { state.marketingOptIn = e.target.checked; return; }
+  if (field === 'tosAgreed') { state.tosAgreed = e.target.checked; render(); }
 });
 
 init();
@@ -766,5 +988,16 @@ async function init() {
     state.loading = false;
     state.loadError = e;
   }
+
+  state.session = await getSession();
+  if (state.session && !state.shipping.email) state.shipping.email = state.session.user.email || '';
   render();
+
+  onAuthStateChange((session) => {
+    const wasLoggedIn = !!state.session;
+    state.session = session;
+    if (session && !state.shipping.email) state.shipping.email = session.user.email || '';
+    render();
+    if (session && !wasLoggedIn && state.page === 'account') loadMyOrdersIntoState();
+  });
 }
