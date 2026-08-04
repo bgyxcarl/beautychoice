@@ -24,10 +24,13 @@ as $$
   select exists (select 1 from admins where user_id = auth.uid());
 $$;
 
--- ⚠️ 把下面这行的邮箱换成你自己登录后台用的管理员邮箱，然后执行，
--- 这样你现有的管理员账号才会被正式加进白名单，否则改完权限后你自己也登不进后台了。
+-- ⚠️ 把下面这行换成你自己登录后台用的管理员邮箱（有几个管理员邮箱就写几行），
+-- 然后执行，这样你现有的管理员账号才会被正式加进白名单，否则改完权限后你自己也登不进后台了。
 insert into admins (user_id)
-select id from auth.users where email = '你的管理员邮箱@example.com'
+select id from auth.users where email in (
+  'yxbg341@gmail.com',
+  'yanxinnancyca@gmail.com'
+)
 on conflict (user_id) do nothing;
 
 -- ---- products：写权限从"任何登录用户"收紧为"只有管理员" ----
@@ -47,6 +50,7 @@ alter table orders add column if not exists user_id uuid references auth.users(i
 
 drop policy if exists "orders_admin_read" on orders;
 drop policy if exists "orders_admin_update" on orders;
+drop policy if exists "orders_customer_read_own" on orders;
 
 create policy "orders_admin_read" on orders
   for select to authenticated using (is_admin());
