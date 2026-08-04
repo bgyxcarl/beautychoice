@@ -209,7 +209,7 @@ function renderProductsTab() {
         ${CATEGORIES.map((c) => `<option value="${c.key}" ${c.key === p.category ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}
       </select>
       <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:13px;color:#8a7f72;">$</span>
+        <span style="font-size:13px;color:#8a7f72;">CA$</span>
         <input type="number" data-field="price" data-id="${esc(p.id)}" value="${p.price}" style="width:70px;padding:10px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
       </div>
       <button data-action="deleteRow" data-id="${esc(p.id)}" style="padding:8px 14px;background:none;border:1px solid #e3d9cc;font-size:13px;color:#8a4a3f;cursor:pointer;">删除</button>
@@ -239,7 +239,7 @@ function renderProductsTab() {
           </select>
         </div>
         <div>
-          <div style="font-size:12px;color:#8a7f72;margin-bottom:6px;">价格 (USD)</div>
+          <div style="font-size:12px;color:#8a7f72;margin-bottom:6px;">价格 (CAD)</div>
           <input type="number" data-field="newPrice" value="${state.newPrice}" style="width:100%;padding:12px;border:1px solid #d8cdbd;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
         </div>
       </div>
@@ -272,18 +272,18 @@ function renderOrdersTab() {
 
   const rows = state.orders.map((o) => {
     const items = Array.isArray(o.items) ? o.items : [];
-    const itemsSummary = items.map((it) => `${esc(it.name)} × ${it.qty}（${esc(it.size)}）`).join('、');
+    const itemsSummary = items.map((it) => `${esc(it.name)} × ${it.qty}（${esc(it.size)}） CA$${Number(it.price).toFixed(2)}`).join('、');
     const shipped = o.status === 'shipped';
     return `
     <div style="border-bottom:1px solid #ece3d6;padding:20px 0;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;">
         <div style="font-size:14px;font-weight:600;">${esc(o.customer_name)} · ${esc(o.customer_email)}</div>
-        <div style="font-size:12px;color:#8a7f72;">${fmtDate(o.created_at)}</div>
+        <div style="font-size:12px;color:#8a7f72;">#${esc(String(o.id).slice(0, 8))} · ${fmtDate(o.created_at)}</div>
       </div>
       <div style="font-size:13px;color:#4a3f37;margin-top:8px;">${itemsSummary}</div>
       <div style="font-size:13px;color:#8a7f72;margin-top:6px;">${esc(o.address)}, ${esc(o.city)} ${esc(o.zip)}, ${esc(o.country)}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:10px;">
-        <div style="font-size:13px;color:#8a7f72;">PayPal 订单号：${esc(o.paypal_order_id || '-')} · 总计 $${Number(o.total).toFixed(2)}</div>
+        <div style="font-size:13px;color:#8a7f72;">PayPal 订单号：${esc(o.paypal_order_id || '-')} · 总计 CA$${Number(o.total).toFixed(2)}</div>
         <button data-action="toggleOrderStatus" data-id="${esc(o.id)}" data-current="${esc(o.status)}" style="padding:8px 14px;background:${shipped ? '#efe6da' : '#2b2420'};color:${shipped ? '#2b2420' : '#f8f4ef'};border:none;font-size:12px;font-weight:600;cursor:pointer;">${shipped ? '已发货' : '标记为已发货'}</button>
       </div>
     </div>`;

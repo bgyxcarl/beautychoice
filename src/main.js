@@ -20,6 +20,7 @@ const state = {
   detailQty: 1,
   addedToast: false,
   orderPlaced: false,
+  lastOrderId: null,
   shipping: { name: '', email: '', address: '', city: '', zip: '', country: '' },
   contact: { name: '', email: '', message: '' },
   contactStatus: null, // 'sending' | 'sent' | 'error'
@@ -37,7 +38,7 @@ function T(key, vars) {
 }
 
 function fmtPrice(n) {
-  return '$' + n.toFixed(2);
+  return 'CA$' + n.toFixed(2);
 }
 
 function goTo(page) {
@@ -349,6 +350,7 @@ function renderCheckout(d) {
       <div style="text-align:center;padding:96px 0;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;">${T('orderPlacedTitle')}</div>
         <div style="font-size:15px;color:#4a3f37;margin-top:16px;">${T('orderPlacedText')}</div>
+        ${state.lastOrderId ? `<div style="font-size:13px;color:#8a7f72;margin-top:12px;">${T('orderRefLabel')} #${esc(String(state.lastOrderId).slice(0, 8))}</div>` : ''}
         <button data-action="goTo" data-page="shop" style="margin-top:28px;padding:14px 32px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;cursor:pointer;">${T('continueShopping')}</button>
       </div>
     </div>`;
@@ -592,14 +594,14 @@ function mountPayPalButtons() {
       createOrder: (data, actions) => {
         const fresh = getDerived();
         return actions.order.create({
-          purchase_units: [{ amount: { value: fresh.totalNum.toFixed(2), currency_code: 'USD' } }],
+          purchase_units: [{ amount: { value: fresh.totalNum.toFixed(2), currency_code: 'CAD' } }],
         });
       },
       onApprove: async (data, actions) => {
         await actions.order.capture();
         const fresh = getDerived();
         try {
-          await createOrder({
+          const orderRecord = await createOrder({
             paypalOrderId: data.orderID,
             name: state.shipping.name,
             email: state.shipping.email,
@@ -612,6 +614,7 @@ function mountPayPalButtons() {
             shipping: fresh.shippingNum,
             total: fresh.totalNum,
           });
+          state.lastOrderId = orderRecord.id;
         } catch (e) {
           console.error('Payment succeeded but failed to record order in Supabase:', e);
         }
@@ -658,6 +661,7 @@ function addToCart() {
   const idx = state.cart.findIndex((c) => c.id === product.id && c.size === size);
   if (idx >= 0) state.cart[idx].qty += qty;
   else state.cart.push({ id: product.id, size, qty });
+  state.orderPlaced = false;
   state.addedToast = true;
   render();
   if (toastTimer) clearTimeout(toastTimer);

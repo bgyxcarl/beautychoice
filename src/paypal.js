@@ -10,7 +10,7 @@ export function loadPayPalSdk() {
   if (sdkPromise) return sdkPromise;
   sdkPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=CAD`;
     script.onload = () => resolve(window.paypal);
     script.onerror = () => { sdkPromise = null; reject(new Error('Failed to load PayPal SDK')); };
     document.head.appendChild(script);

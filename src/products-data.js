@@ -66,6 +66,7 @@ export const UI_STRINGS = {
   placeOrder: { zh: '确认下单', en: 'Place Order', fr: 'Confirmer la Commande' },
   orderPlacedTitle: { zh: '订单已提交', en: 'Order Placed', fr: 'Commande Confirmée' },
   orderPlacedText: { zh: '感谢您的订购，我们会尽快为您安排发货。', en: 'Thank you for your order — we will get it ready to ship shortly.', fr: 'Merci pour votre commande — nous la préparons pour expédition sous peu.' },
+  orderRefLabel: { zh: '订单编号', en: 'Order reference', fr: 'Référence de commande' },
   continueShopping: { zh: '继续购物', en: 'Continue Shopping', fr: 'Continuer les Achats' },
   aboutLabel: { zh: '关于我', en: 'About Me', fr: 'À propos de moi' },
   aboutTitle: { zh: '我的故事', en: 'My Story', fr: 'Mon Histoire' },
