@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #f8f4ef; }
+  a { color: #b3875f; text-decoration: none; }
+  a:hover { color: #8a6a49; }
+</style>
+<script src="./image-slot.js"></script>
+</helmet>
+
+<div style="font-family:'Work Sans',sans-serif;background:#f8f4ef;min-height:100vh;color:#2b2420;">
+
+  <sc-if value="{{promoBarEnabled}}" hint-placeholder-val="{{true}}">
+    <div style="background:#2b2420;color:#f1e9df;text-align:center;padding:10px 16px;font-size:13px;letter-spacing:0.02em;">
+      {{ui.promoBar}}
+    </div>
+  </sc-if>
+
+  <div style="position:sticky;top:0;z-index:20;background:#f8f4ef;border-bottom:1px solid #e3d9cc;">
+    <div style="max-width:1280px;margin:0 auto;padding:22px 48px;display:flex;align-items:center;justify-content:space-between;">
+      <div onClick="{{goHome}}" style="cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;letter-spacing:0.01em;color:#2b2420;">beautychoice</div>
+      <div style="display:flex;gap:36px;">
+        <sc-for list="{{navItems}}" as="item" hint-placeholder-count="5">
+          <div onClick="{{item.onClick}}" style="cursor:pointer;font-size:15px;color:{{item.color}};font-weight:{{item.weight}};">{{item.label}}</div>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px;">
+        <div style="display:flex;gap:6px;">
+          <sc-for list="{{langOptions}}" as="l" hint-placeholder-count="3">
+            <div onClick="{{l.onClick}}" style="cursor:pointer;font-size:12px;padding:4px 8px;color:{{l.color}};font-weight:{{l.weight}};border:1px solid {{l.border}};">{{l.label}}</div>
+          </sc-for>
+        </div>
+        <div onClick="{{goCart}}" style="cursor:pointer;position:relative;display:flex;align-items:center;gap:8px;font-size:15px;">
+          <span>{{ui.cart}}</span>
+          <sc-if value="{{hasCartItems}}" hint-placeholder-val="{{false}}">
+            <span style="background:#c9a27a;color:#231d19;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">{{cartCount}}</span>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{isHome}}" hint-placeholder-val="{{true}}">
+  <div data-screen-label="首页">
+    <div style="position:relative;width:100%;height:640px;overflow:hidden;">
+      <img src="assets/products/almond/BCMAL015.jpg" alt="beautychoice" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;" />
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(20,16,14,0) 35%, rgba(20,16,14,0.65) 100%);pointer-events:none;"></div>
+      <div style="position:absolute;left:48px;bottom:64px;max-width:560px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:700;line-height:1.05;color:#fdfaf6;">{{ui.heroTitle1}}<br>{{ui.heroTitle2}}</div>
+        <div style="font-size:17px;color:#f1e9df;margin-top:16px;">{{ui.heroSubtitle}}</div>
+        <button onClick="{{goShop}}" style="margin-top:28px;padding:15px 34px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;letter-spacing:0.02em;cursor:pointer;">{{ui.heroButton}}</button>
+      </div>
+    </div>
+
+    <div style="max-width:1280px;margin:0 auto;padding:96px 48px 80px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:40px;">
+        <div>
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">{{ui.featuredLabel}}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:8px;">{{ui.featuredTitle}}</div>
+        </div>
+        <a href="#" onClick="{{goShop}}" style="font-size:14px;">{{ui.viewAll}}</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;">
+        <sc-for list="{{featuredProducts}}" as="p" hint-placeholder-count="0">
+          <dc-import name="ProductCard" product="{{p}}" on-select="{{p.onSelect}}" hint-size="100%,380px"></dc-import>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background:#efe6da;padding:88px 48px;">
+      <div style="max-width:1280px;margin:0 auto;">
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;text-align:center;">{{ui.categoryLabel}}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:8px;text-align:center;">{{ui.categoryTitle}}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:48px;">
+          <sc-for list="{{categoryCards}}" as="c" hint-placeholder-count="0">
+            <div onClick="{{c.onClick}}" style="cursor:pointer;background:#f8f4ef;">
+              <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">
+                <sc-if value="{{c.hasThumb}}" hint-placeholder-val="{{false}}">
+                  <dc-import name="ImgTile" src="{{c.thumb}}" alt="{{c.label}}" hint-size="100%,100%"></dc-import>
+                </sc-if>
+              </div>
+              <div style="padding:18px;">
+                <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;">{{c.label}}</div>
+                <div style="font-size:13px;color:#8a7f72;margin-top:4px;">{{c.count}}{{ui.unitCount}}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width:1280px;margin:0 auto;padding:88px 48px;">
+      <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;text-align:center;">{{ui.reviewsLabel}}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:8px;text-align:center;">{{ui.reviewsTitle}}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:48px;">
+        <sc-for list="{{teaserReviews}}" as="r" hint-placeholder-count="3">
+          <div style="background:#efe6da;padding:32px;">
+            <div style="font-size:15px;color:#4a3f37;line-height:1.6;">{{r.quote}}</div>
+            <div style="font-size:13px;color:#8a7f72;margin-top:16px;">{{r.name}}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="text-align:center;margin-top:40px;">
+        <a href="#" onClick="{{goReviews}}" style="font-size:14px;">{{ui.viewAllReviews}}</a>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isShop}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="全部商品" style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">{{ui.shopTitle}}</div>
+    <div style="display:flex;gap:24px;margin-top:32px;border-bottom:1px solid #e3d9cc;padding-bottom:20px;flex-wrap:wrap;">
+      <sc-for list="{{categoryFilters}}" as="f" hint-placeholder-count="9">
+        <div onClick="{{f.onClick}}" style="cursor:pointer;font-size:14px;color:{{f.color}};font-weight:{{f.weight}};white-space:nowrap;">{{f.label}}</div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:48px;">
+      <sc-for list="{{filteredShopProducts}}" as="p" hint-placeholder-count="0">
+        <dc-import name="ProductCard" product="{{p}}" on-select="{{p.onSelect}}" hint-size="100%,380px"></dc-import>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isProduct}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="商品详情" style="max-width:1280px;margin:0 auto;padding:56px 48px 96px;">
+    <div style="font-size:13px;color:#8a7f72;">
+      <a href="#" onClick="{{goHome}}">{{ui.breadcrumbHome}}</a> / <a href="#" onClick="{{goShop}}">{{ui.shopTitle}}</a> / {{selectedProduct.displayName}}
+    </div>
+    <sc-if value="{{hasSelectedProduct}}" hint-placeholder-val="{{false}}">
+    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:64px;margin-top:32px;">
+      <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">
+        <sc-if value="{{selectedProduct.hasStaticImg}}" hint-placeholder-val="{{false}}">
+          <dc-import name="ImgTile" src="{{selectedProduct.img}}" alt="{{selectedProduct.displayName}}" hint-size="100%,100%"></dc-import>
+        </sc-if>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">{{selectedProduct.displayCategoryLabel}}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;margin-top:10px;">{{selectedProduct.displayName}}</div>
+        <div style="font-size:22px;margin-top:14px;">{{selectedProduct.priceLabel}}</div>
+        <div style="font-size:15px;line-height:1.7;color:#4a3f37;margin-top:24px;">{{selectedProduct.displayDesc}}</div>
+
+        <div style="margin-top:32px;">
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;">{{ui.selectSize}}</div>
+          <div style="display:flex;gap:12px;">
+            <sc-for list="{{sizeOptions}}" as="sz" hint-placeholder-count="4">
+              <div onClick="{{sz.onClick}}" style="cursor:pointer;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:1px solid {{sz.borderColor}};background:{{sz.bg}};color:{{sz.color}};font-size:14px;font-weight:600;">{{sz.label}}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;display:flex;align-items:center;gap:20px;">
+          <div style="display:flex;align-items:center;border:1px solid #e3d9cc;">
+            <button onClick="{{decQty}}" style="width:40px;height:40px;border:none;background:none;font-size:18px;cursor:pointer;">−</button>
+            <div style="width:40px;text-align:center;font-size:15px;">{{detailQty}}</div>
+            <button onClick="{{incQty}}" style="width:40px;height:40px;border:none;background:none;font-size:18px;cursor:pointer;">+</button>
+          </div>
+          <button onClick="{{addToCart}}" style="flex:1;padding:16px 0;background:#2b2420;color:#f8f4ef;border:none;font-size:15px;font-weight:600;letter-spacing:0.02em;cursor:pointer;">{{ui.addToCart}}</button>
+        </div>
+        <sc-if value="{{addedToast}}" hint-placeholder-val="{{false}}">
+          <div style="margin-top:14px;font-size:13px;color:#6b8f6f;">{{ui.addedToast}}</div>
+        </sc-if>
+
+        <div style="margin-top:40px;border-top:1px solid #e3d9cc;padding-top:28px;">
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;">{{ui.careLabel}}</div>
+          <div style="font-size:14px;line-height:1.8;color:#4a3f37;">{{ui.careText}}</div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <div style="margin-top:88px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin-bottom:32px;">{{ui.sameCategoryTitle}}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;">
+        <sc-for list="{{sameCategoryProducts}}" as="p" hint-placeholder-count="0">
+          <dc-import name="ProductCard" product="{{p}}" on-select="{{p.onSelect}}" hint-size="100%,380px"></dc-import>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isCart}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="购物车" style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">{{ui.cartTitle}}</div>
+    <sc-if value="{{hasCartItems}}" hint-placeholder-val="{{false}}">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:64px;margin-top:40px;">
+        <div>
+          <sc-for list="{{cartLines}}" as="l" hint-placeholder-count="0">
+            <div style="display:flex;gap:24px;align-items:center;padding:24px 0;border-bottom:1px solid #e3d9cc;">
+              <div style="width:96px;height:96px;overflow:hidden;flex-shrink:0;">
+                <sc-if value="{{l.product.hasStaticImg}}" hint-placeholder-val="{{false}}">
+                  <dc-import name="ImgTile" src="{{l.product.img}}" alt="{{l.product.displayName}}" hint-size="100%,100%"></dc-import>
+                </sc-if>
+              </div>
+              <div style="flex:1;">
+                <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;">{{l.product.displayName}}</div>
+                <div style="font-size:13px;color:#8a7f72;margin-top:6px;">{{l.product.displayCategoryLabel}} · {{l.size}}</div>
+                <div style="margin-top:14px;display:flex;align-items:center;gap:16px;">
+                  <div style="display:flex;align-items:center;border:1px solid #e3d9cc;">
+                    <button onClick="{{l.onDec}}" style="width:32px;height:32px;border:none;background:none;font-size:15px;cursor:pointer;">−</button>
+                    <div style="width:32px;text-align:center;font-size:14px;">{{l.qty}}</div>
+                    <button onClick="{{l.onInc}}" style="width:32px;height:32px;border:none;background:none;font-size:15px;cursor:pointer;">+</button>
+                  </div>
+                  <a href="#" onClick="{{l.onRemove}}" style="font-size:13px;color:#8a7f72;">×</a>
+                </div>
+              </div>
+              <div style="font-size:16px;">{{l.lineTotalLabel}}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#efe6da;padding:32px;align-self:start;">
+          <div style="display:flex;justify-content:space-between;font-size:15px;">
+            <span>{{ui.subtotal}}</span><span>{{subtotalLabel}}</span>
+          </div>
+          <div style="font-size:13px;color:#8a7f72;margin-top:12px;">{{ui.shippingNote}}</div>
+          <button onClick="{{goCheckout}}" style="width:100%;margin-top:24px;padding:16px 0;background:#2b2420;color:#f8f4ef;border:none;font-size:15px;font-weight:600;cursor:pointer;">{{ui.goCheckout}}</button>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{cartIsEmpty}}" hint-placeholder-val="{{true}}">
+      <div style="text-align:center;padding:96px 0;">
+        <div style="font-size:16px;color:#8a7f72;">{{ui.emptyCart}}</div>
+        <button onClick="{{goShop}}" style="margin-top:24px;padding:14px 32px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;cursor:pointer;">{{ui.goShopBtn}}</button>
+      </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isCheckout}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="结算" style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <sc-if value="{{orderPlaced}}" hint-placeholder-val="{{false}}">
+      <div style="text-align:center;padding:96px 0;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;">{{ui.orderPlacedTitle}}</div>
+        <div style="font-size:15px;color:#4a3f37;margin-top:16px;">{{ui.orderPlacedText}}</div>
+        <button onClick="{{goShop}}" style="margin-top:28px;padding:14px 32px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;cursor:pointer;">{{ui.continueShopping}}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{showCheckoutForm}}" hint-placeholder-val="{{true}}">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">{{ui.checkoutTitle}}</div>
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:64px;margin-top:40px;">
+        <div>
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">{{ui.shippingInfoLabel}}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <input value="{{shipping.name}}" onChange="{{shippingHandlers.name}}" placeholder="{{ui.fieldName}}" style="grid-column:span 2;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+            <input value="{{shipping.email}}" onChange="{{shippingHandlers.email}}" placeholder="{{ui.fieldEmail}}" style="grid-column:span 2;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+            <input value="{{shipping.address}}" onChange="{{shippingHandlers.address}}" placeholder="{{ui.fieldAddress}}" style="grid-column:span 2;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+            <input value="{{shipping.city}}" onChange="{{shippingHandlers.city}}" placeholder="{{ui.fieldCity}}" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+            <input value="{{shipping.zip}}" onChange="{{shippingHandlers.zip}}" placeholder="{{ui.fieldZip}}" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+            <input value="{{shipping.country}}" onChange="{{shippingHandlers.country}}" placeholder="{{ui.fieldCountry}}" style="grid-column:span 2;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+          </div>
+
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin:32px 0 16px;">{{ui.paymentLabel}}</div>
+          <div style="display:flex;gap:16px;">
+            <div onClick="{{selectPaypal}}" style="cursor:pointer;flex:1;padding:18px;border:1px solid {{paypalBorder}};background:{{paypalBg}};text-align:center;font-size:14px;font-weight:600;">{{ui.paypal}}</div>
+            <div onClick="{{selectCard}}" style="cursor:pointer;flex:1;padding:18px;border:1px solid {{cardBorder}};background:{{cardBg}};text-align:center;font-size:14px;font-weight:600;">{{ui.card}}</div>
+          </div>
+          <sc-if value="{{isCardPayment}}" hint-placeholder-val="{{false}}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;">
+              <input value="{{shipping.cardNumber}}" onChange="{{shippingHandlers.cardNumber}}" placeholder="{{ui.cardNumber}}" style="grid-column:span 2;padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+              <input value="{{shipping.cardExp}}" onChange="{{shippingHandlers.cardExp}}" placeholder="{{ui.cardExp}}" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+              <input value="{{shipping.cardCvv}}" onChange="{{shippingHandlers.cardCvv}}" placeholder="{{ui.cardCvv}}" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+            </div>
+          </sc-if>
+          <sc-if value="{{isPaypalPayment}}" hint-placeholder-val="{{true}}">
+            <div style="font-size:13px;color:#8a7f72;margin-top:16px;">{{ui.paypalNote}}</div>
+          </sc-if>
+        </div>
+
+        <div style="background:#efe6da;padding:32px;align-self:start;">
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">{{ui.orderSummary}}</div>
+          <sc-for list="{{cartLines}}" as="l" hint-placeholder-count="0">
+            <div style="display:flex;justify-content:space-between;font-size:14px;padding:8px 0;">
+              <span>{{l.product.displayName}} × {{l.qty}}</span><span>{{l.lineTotalLabel}}</span>
+            </div>
+          </sc-for>
+          <div style="border-top:1px solid #d8cdbd;margin-top:16px;padding-top:16px;display:flex;justify-content:space-between;font-size:14px;">
+            <span>{{ui.subtotal}}</span><span>{{subtotalLabel}}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:8px;">
+            <span>{{ui.shippingLabelWord}}</span><span>{{shippingLabel}}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:18px;margin-top:16px;font-weight:600;">
+            <span>{{ui.totalLabel}}</span><span>{{totalLabel}}</span>
+          </div>
+          <button onClick="{{placeOrder}}" style="width:100%;margin-top:24px;padding:16px 0;background:#2b2420;color:#f8f4ef;border:none;font-size:15px;font-weight:600;cursor:pointer;">{{ui.placeOrder}}</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isAbout}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="关于我" style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;">
+      <div style="width:100%;aspect-ratio:4/5;overflow:hidden;background:#efe6da;">
+        <svg viewBox="0 0 400 500" style="width:100%;height:100%;display:block;">
+          <rect width="400" height="500" fill="#efe6da"/>
+          <circle cx="200" cy="150" r="90" fill="#e3d4c2" opacity="0.6"/>
+          <ellipse cx="150" cy="430" rx="150" ry="18" fill="#dccab3" opacity="0.5"/>
+          <g>
+            <rect x="90" y="230" width="70" height="150" rx="35" fill="#8a6a49"/>
+            <circle cx="125" cy="205" r="38" fill="#e0b592"/>
+            <path d="M87 195 Q125 150 163 195 L163 230 Q125 210 87 230 Z" fill="#2b2420"/>
+          </g>
+          <g>
+            <rect x="180" y="200" width="80" height="180" rx="38" fill="#2b2420"/>
+            <circle cx="220" cy="172" r="42" fill="#c98f63"/>
+            <path d="M176 165 Q220 110 264 165 L264 205 Q220 180 176 205 Z" fill="#4a3020"/>
+          </g>
+          <g>
+            <ellipse cx="300" cy="400" rx="55" ry="38" fill="#c9a27a"/>
+            <circle cx="335" cy="365" r="30" fill="#c9a27a"/>
+            <ellipse cx="352" cy="358" rx="10" ry="14" fill="#b3875f" transform="rotate(20 352 358)"/>
+            <ellipse cx="325" cy="352" rx="9" ry="13" fill="#b3875f" transform="rotate(-15 325 352)"/>
+            <circle cx="345" cy="360" r="3" fill="#2b2420"/>
+            <ellipse cx="352" cy="372" rx="6" ry="4" fill="#4a3020"/>
+            <rect x="325" y="380" width="8" height="30" rx="4" fill="#c9a27a"/>
+            <rect x="345" y="380" width="8" height="30" rx="4" fill="#c9a27a"/>
+            <circle cx="330" cy="352" r="4" fill="#c9a27a"/>
+            <path d="M330 340 Q328 330 335 332" stroke="#c9a27a" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </g>
+          <text x="200" y="470" text-anchor="middle" font-family="Georgia, serif" font-size="17" fill="#8a7f72" font-style="italic">Two women. One dog.</text>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">{{ui.aboutLabel}}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:12px;">{{ui.aboutTitle}}</div>
+        <div style="font-size:15px;line-height:1.8;color:#4a3f37;margin-top:24px;">{{ui.aboutText1}}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:#2b2420;margin-top:20px;">{{ui.aboutText2}}</div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-top:24px;">{{ui.aboutNote}}</div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isContact}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="联系方式" style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">{{ui.contactTitle}}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:40px;">
+      <div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">{{ui.directContact}}</div>
+        <div style="font-size:15px;line-height:2;color:#4a3f37;">
+          {{ui.emailValue}}<br>
+          {{ui.replyTime}}
+        </div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin:32px 0 16px;">{{ui.socialLabel}}</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div style="padding:12px 20px;border:1px solid #e3d9cc;font-size:14px;">Instagram · @beautychoice</div>
+          <div style="padding:12px 20px;border:1px solid #e3d9cc;font-size:14px;">小红书 · beautychoice</div>
+          <div style="padding:12px 20px;border:1px solid #e3d9cc;font-size:14px;">TikTok · @beautychoice</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">{{ui.messageLabel}}</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <input placeholder="{{ui.fieldName}}" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+          <input placeholder="{{ui.fieldEmail}}" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
+          <textarea placeholder="{{ui.fieldQuestion}}" rows="5" style="padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;resize:vertical;"></textarea>
+          <button style="padding:15px 0;background:#2b2420;color:#f8f4ef;border:none;font-size:15px;font-weight:600;cursor:pointer;">{{ui.sendMessage}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isReviews}}" hint-placeholder-val="{{false}}">
+  <div data-screen-label="客户评价" style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">{{ui.reviewsTitle}}</div>
+    <div style="font-size:14px;color:#c9a27a;margin-top:12px;">{{ui.reviewsPlaceholder}}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:40px;">
+      <sc-for list="{{reviewCards}}" as="r" hint-placeholder-count="6">
+        <div style="background:#efe6da;">
+          <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">
+            <image-slot id="{{r.slotId}}" shape="rect" placeholder="客户晒单照片"></image-slot>
+          </div>
+          <div style="padding:24px;">
+            <div style="font-size:14px;color:#c9a27a;">★★★★★</div>
+            <div style="font-size:14px;line-height:1.7;color:#4a3f37;margin-top:12px;">在此处替换为真实客户评价文字</div>
+            <div style="font-size:13px;color:#8a7f72;margin-top:14px;">客户昵称</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="background:#2b2420;color:#d8cdbd;padding:64px 48px 40px;">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:48px;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#f1e9df;">beautychoice</div>
+        <div style="font-size:14px;margin-top:12px;line-height:1.7;">{{ui.footerTagline}}<br>{{ui.footerTagline2}}</div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">{{ui.footerNav}}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+          <a href="#" onClick="{{goHome}}" style="color:#d8cdbd;">{{ui.navHome}}</a>
+          <a href="#" onClick="{{goShop}}" style="color:#d8cdbd;">{{ui.navShop}}</a>
+          <a href="#" onClick="{{goAbout}}" style="color:#d8cdbd;">{{ui.navAbout}}</a>
+          <a href="#" onClick="{{goReviews}}" style="color:#d8cdbd;">{{ui.navReviews}}</a>
+          <a href="#" onClick="{{goContact}}" style="color:#d8cdbd;">{{ui.navContact}}</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">{{ui.footerPayment}}</div>
+        <div style="font-size:14px;">{{ui.footerPaymentValue}}</div>
+      </div>
+    </div>
+    <div style="max-width:1280px;margin:40px auto 0;border-top:1px solid #4a4038;padding-top:24px;font-size:12px;color:#8a7f72;">
+      {{ui.footerCopyright}}
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;promoBarEnabled&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;显示设置&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;USD&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;USD&quot;,&quot;CNY&quot;],&quot;section&quot;:&quot;显示设置&quot;}}">
+class Component extends DCLogic {
+  state = {
+    page: 'home',
+    lang: 'zh',
+    products: [],
+    mounted: false,
+    cart: [],
+    categoryFilter: 'all',
+    selectedProductId: null,
+    detailSize: 'M',
+    detailQty: 1,
+    addedToast: false,
+    orderPlaced: false,
+    shipping: { name:'', email:'', address:'', city:'', zip:'', country:'', paymentMethod:'paypal', cardNumber:'', cardExp:'', cardCvv:'' },
+  };
+
+  componentDidMount() {
+    import('./products-data.js').then(mod => {
+      this._mod = mod;
+      this.setState({ products: mod.loadProducts() });
+    });
+    this.setState({ mounted: true });
+  }
+
+  goTo = (page) => { this.setState({ page }); window.scrollTo(0, 0); };
+  setLang = (lang) => this.setState({ lang });
+  openProduct = (id) => { this.setState({ page: 'product', selectedProductId: id, detailSize: 'M', detailQty: 1, addedToast: false }); window.scrollTo(0, 0); };
+  setCategoryFilter = (c) => this.setState({ categoryFilter: c });
+  setDetailSize = (s) => this.setState({ detailSize: s });
+  incQty = () => this.setState(s => ({ detailQty: s.detailQty + 1 }));
+  decQty = () => this.setState(s => ({ detailQty: Math.max(1, s.detailQty - 1) }));
+
+  addToCart = () => {
+    const products = this.state.products;
+    const product = products.find(p => p.id === this.state.selectedProductId);
+    if (!product) return;
+    const size = this.state.detailSize;
+    const qty = this.state.detailQty;
+    this.setState(s => {
+      const cart = [...s.cart || []];
+      const idx = cart.findIndex(c => c.id === product.id && c.size === size);
+      if (idx >= 0) cart[idx] = { ...cart[idx], qty: cart[idx].qty + qty };
+      else cart.push({ id: product.id, size, qty });
+      return { cart, addedToast: true };
+    });
+    setTimeout(() => this.setState({ addedToast: false }), 1800);
+  };
+
+  incCartQty = (index) => this.setState(s => { const cart = [...s.cart]; cart[index] = { ...cart[index], qty: cart[index].qty + 1 }; return { cart }; });
+  decCartQty = (index) => this.setState(s => { const cart = [...s.cart]; cart[index] = { ...cart[index], qty: Math.max(1, cart[index].qty - 1) }; return { cart }; });
+  removeCartItem = (index) => this.setState(s => ({ cart: s.cart.filter((_, i) => i !== index) }));
+
+  updateShipping = (field, value) => this.setState(s => ({ shipping: { ...s.shipping, [field]: value } }));
+  selectPaypal = () => this.updateShipping('paymentMethod', 'paypal');
+  selectCard = () => this.updateShipping('paymentMethod', 'card');
+  placeOrder = () => this.setState({ orderPlaced: true, cart: [] });
+
+  renderVals() {
+    const currency = this.props.currency ?? 'USD';
+    const symbol = currency === 'CNY' ? '¥' : '$';
+    const rate = currency === 'CNY' ? 7.2 : 1;
+    const fmtPrice = (n) => { const v = n * rate; return symbol + (currency === 'CNY' ? Math.round(v) : v.toFixed(2)); };
+    const page = this.state.page;
+    const lang = this.state.lang;
+    const mod = this._mod;
+    const T = (key, vars) => {
+      if (!mod) return '';
+      let s = (mod.UI_STRINGS[key] && mod.UI_STRINGS[key][lang]) || '';
+      if (vars) Object.keys(vars).forEach(k => { s = s.replace('{' + k + '}', vars[k]); });
+      return s;
+    };
+    const nameFor = (p) => lang === 'zh' ? p.name : lang === 'en' ? p.nameEn : p.nameFr;
+    const descFor = (p) => lang === 'zh' ? p.descCn : lang === 'en' ? p.descEn : p.descFr;
+    const catLabelFor = (p) => lang === 'zh' ? p.categoryLabel : lang === 'en' ? p.categoryLabelEn : p.categoryLabelFr;
+
+    const allProducts = this.state.products.map(p => ({
+      ...p, hasStaticImg: !p.useSlot, priceLabel: fmtPrice(p.price),
+      displayName: nameFor(p), displayDesc: descFor(p), displayCategoryLabel: catLabelFor(p),
+      onSelect: () => this.openProduct(p.id),
+    }));
+
+    const uniqueCategories = [];
+    allProducts.forEach(p => { if (!uniqueCategories.find(c => c.key === p.category)) uniqueCategories.push({ key: p.category, label: p.displayCategoryLabel }); });
+
+    const categoryFilters = [{ key: 'all', label: T('filterAll') }, ...uniqueCategories]
+      .map(f => ({ ...f, onClick: () => this.setCategoryFilter(f.key), color: f.key === this.state.categoryFilter ? '#c9a27a' : '#2b2420', weight: f.key === this.state.categoryFilter ? 700 : 500 }));
+    const filteredShopProducts = this.state.categoryFilter === 'all' ? allProducts : allProducts.filter(p => p.category === this.state.categoryFilter);
+
+    const featuredProducts = uniqueCategories.map(cat => allProducts.find(p => p.category === cat.key)).filter(Boolean).slice(0, 3);
+    const categoryCards = uniqueCategories.map(cat => {
+      const rep = allProducts.find(p => p.category === cat.key);
+      return { key: cat.key, label: cat.label, count: allProducts.filter(p => p.category === cat.key).length, thumb: rep ? rep.img : '', hasThumb: !!rep, onClick: () => { this.setCategoryFilter(cat.key); this.goTo('shop'); } };
+    });
+
+    const selectedProduct = allProducts.find(p => p.id === this.state.selectedProductId) || null;
+    const hasSelectedProduct = !!selectedProduct;
+    const sameCategoryProducts = selectedProduct ? allProducts.filter(p => p.category === selectedProduct.category && p.id !== selectedProduct.id).slice(0, 3) : [];
+    const sizeOptions = ['XS', 'S', 'M', 'L'].map(sz => ({
+      label: sz, onClick: () => this.setDetailSize(sz),
+      borderColor: sz === this.state.detailSize ? '#c9a27a' : '#e3d9cc',
+      bg: sz === this.state.detailSize ? '#c9a27a' : '#fff',
+      color: sz === this.state.detailSize ? '#231d19' : '#2b2420',
+    }));
+
+    const cart = this.state.cart || [];
+    const cartLines = cart.map((c, i) => {
+      const product = allProducts.find(p => p.id === c.id);
+      return { ...c, product, lineTotalLabel: fmtPrice(product.price * c.qty), onInc: () => this.incCartQty(i), onDec: () => this.decCartQty(i), onRemove: () => this.removeCartItem(i) };
+    });
+    const subtotalNum = cartLines.reduce((s, l) => s + l.product.price * l.qty, 0);
+    const cartCount = cart.reduce((s, c) => s + c.qty, 0);
+    const shippingFlat = 6;
+    const isFreeShip = subtotalNum >= 80;
+    const shippingLabel = isFreeShip ? (lang === 'zh' ? '免运费' : lang === 'en' ? 'Free' : 'Gratuit') : fmtPrice(shippingFlat);
+    const totalLabel = fmtPrice(subtotalNum + (isFreeShip ? 0 : shippingFlat));
+
+    const navBase = [
+      { key: 'home', label: T('navHome'), page: 'home' },
+      { key: 'shop', label: T('navShop'), page: 'shop' },
+      { key: 'about', label: T('navAbout'), page: 'about' },
+      { key: 'reviews', label: T('navReviews'), page: 'reviews' },
+      { key: 'contact', label: T('navContact'), page: 'contact' },
+    ];
+    const navItems = navBase.map(n => ({ ...n, onClick: () => this.goTo(n.page), color: n.page === page ? '#c9a27a' : '#2b2420', weight: n.page === page ? 700 : 500 }));
+
+    const langList = [{ key: 'zh', label: '中' }, { key: 'en', label: 'EN' }, { key: 'fr', label: 'FR' }];
+    const langOptions = langList.map(l => ({ ...l, onClick: () => this.setLang(l.key), color: l.key === lang ? '#c9a27a' : '#2b2420', weight: l.key === lang ? 700 : 500, border: l.key === lang ? '#c9a27a' : '#e3d9cc' }));
+
+    const teaserReviews = lang === 'zh' ? [
+      { quote: '甲片贴合度很好，戴了一周边缘都没有翘起，摘下来指甲也完好。', name: '@momo' },
+      { quote: '尺码选对了直接能戴，客服回复很快，选款的时候帮我推荐了合适的甲型。', name: '@xiaotu' },
+      { quote: '细节比照片看到的还精致，镶嵌的部分很牢固，送人也很拿得出手。', name: '@ruru' },
+    ] : lang === 'en' ? [
+      { quote: 'Great fit — wore it a full week with no lifting, and my natural nails were fine after removal.', name: '@momo' },
+      { quote: 'Picked the right size and it just worked. The seller helped me choose the shape too.', name: '@xiaotu' },
+      { quote: 'Detail is even nicer in person, and the gems stay firmly in place. Great gift too.', name: '@ruru' },
+    ] : [
+      { quote: 'Excellent tenue — portés une semaine entière sans décollement, mes ongles naturels intacts.', name: '@momo' },
+      { quote: "J'ai choisi la bonne taille et tout s'est bien passé, la vendeuse m'a aidée à choisir la forme.", name: '@xiaotu' },
+      { quote: "Les détails sont encore plus beaux en vrai, les pierres tiennent bien. Idéal en cadeau aussi.", name: '@ruru' },
+    ];
+    const reviewCards = Array.from({ length: 6 }, (_, i) => ({ slotId: 'review-' + i }));
+
+    const shipping = this.state.shipping;
+    const shippingHandlers = {};
+    ['name','email','address','city','zip','country','cardNumber','cardExp','cardCvv'].forEach(f => {
+      shippingHandlers[f] = (e) => this.updateShipping(f, e.target.value);
+    });
+
+    return {
+      page, isHome: page === 'home', isShop: page === 'shop', isProduct: page === 'product', isCart: page === 'cart', isCheckout: page === 'checkout', isAbout: page === 'about', isContact: page === 'contact', isReviews: page === 'reviews',
+      promoBarEnabled: this.props.promoBarEnabled ?? true,
+      ui: {
+        promoBar: T('promoBar', { amt: fmtPrice(80) }),
+        navHome: T('navHome'), navShop: T('navShop'), navAbout: T('navAbout'), navReviews: T('navReviews'), navContact: T('navContact'), cart: T('cart'),
+        heroTitle1: T('heroTitle1'), heroTitle2: T('heroTitle2'), heroSubtitle: T('heroSubtitle'), heroButton: T('heroButton'),
+        featuredLabel: T('featuredLabel'), featuredTitle: T('featuredTitle'), viewAll: T('viewAll'),
+        categoryLabel: T('categoryLabel'), categoryTitle: T('categoryTitle'), unitCount: T('unitCount'),
+        reviewsLabel: T('reviewsLabel'), reviewsTitle: T('reviewsTitle'), viewAllReviews: T('viewAllReviews'),
+        shopTitle: T('shopTitle'), filterAll: T('filterAll'), breadcrumbHome: T('breadcrumbHome'),
+        selectSize: T('selectSize'), addToCart: T('addToCart'), addedToast: T('addedToast'), careLabel: T('careLabel'), careText: T('careText'),
+        sameCategoryTitle: T('sameCategoryTitle'),
+        cartTitle: T('cartTitle'), subtotal: T('subtotal'), shippingNote: T('shippingNote'), goCheckout: T('goCheckout'), emptyCart: T('emptyCart'), goShopBtn: T('goShopBtn'),
+        checkoutTitle: T('checkoutTitle'), shippingInfoLabel: T('shippingInfoLabel'),
+        fieldName: T('fieldName'), fieldEmail: T('fieldEmail'), fieldAddress: T('fieldAddress'), fieldCity: T('fieldCity'), fieldZip: T('fieldZip'), fieldCountry: T('fieldCountry'),
+        paymentLabel: T('paymentLabel'), paypal: T('paypal'), card: T('card'), cardNumber: T('cardNumber'), cardExp: T('cardExp'), cardCvv: T('cardCvv'), paypalNote: T('paypalNote'),
+        orderSummary: T('orderSummary'), shippingLabelWord: T('shippingLabelWord'), totalLabel: T('totalLabel'), placeOrder: T('placeOrder'),
+        orderPlacedTitle: T('orderPlacedTitle'), orderPlacedText: T('orderPlacedText'), continueShopping: T('continueShopping'),
+        aboutLabel: T('aboutLabel'), aboutTitle: T('aboutTitle'), aboutText1: T('aboutText1'), aboutText2: T('aboutText2'), aboutNote: T('aboutNote'),
+        contactTitle: T('contactTitle'), directContact: T('directContact'), emailValue: T('emailValue'), replyTime: T('replyTime'), socialLabel: T('socialLabel'),
+        messageLabel: T('messageLabel'), fieldQuestion: T('fieldQuestion'), sendMessage: T('sendMessage'),
+        reviewsPlaceholder: T('reviewsPlaceholder'),
+        footerTagline: T('footerTagline'), footerTagline2: T('footerTagline2'), footerNav: T('footerNav'), footerPayment: T('footerPayment'), footerPaymentValue: T('footerPaymentValue'), footerCopyright: T('footerCopyright'),
+      },
+      navItems, langOptions,
+      hasCartItems: cartCount > 0, cartIsEmpty: cartCount === 0, cartCount, cartLines, subtotalLabel: fmtPrice(subtotalNum), shippingLabel, totalLabel,
+      featuredProducts, categoryCards, categoryFilters, filteredShopProducts, teaserReviews, reviewCards,
+      mounted: this.state.mounted, selectedProduct, hasSelectedProduct, sameCategoryProducts, sizeOptions, detailQty: this.state.detailQty, addedToast: this.state.addedToast,
+      shipping, shippingHandlers, orderPlaced: this.state.orderPlaced, showCheckoutForm: !this.state.orderPlaced,
+      paypalBorder: shipping.paymentMethod === 'paypal' ? '#c9a27a' : '#e3d9cc', paypalBg: shipping.paymentMethod === 'paypal' ? '#f6ecdf' : '#fff',
+      cardBorder: shipping.paymentMethod === 'card' ? '#c9a27a' : '#e3d9cc', cardBg: shipping.paymentMethod === 'card' ? '#f6ecdf' : '#fff',
+      isCardPayment: shipping.paymentMethod === 'card', isPaypalPayment: shipping.paymentMethod === 'paypal',
+      goHome: () => this.goTo('home'), goShop: () => this.goTo('shop'), goCart: () => this.goTo('cart'), goCheckout: () => this.goTo('checkout'), goAbout: () => this.goTo('about'), goContact: () => this.goTo('contact'), goReviews: () => this.goTo('reviews'),
+      addToCart: this.addToCart, incQty: this.incQty, decQty: this.decQty, placeOrder: this.placeOrder,
+      selectPaypal: this.selectPaypal, selectCard: this.selectCard,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

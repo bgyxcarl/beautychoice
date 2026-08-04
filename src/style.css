@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #f8f4ef;
+  font-family: 'Work Sans', sans-serif;
+  color: #2b2420;
+}
+
+a { color: #b3875f; text-decoration: none; }
+a:hover { color: #8a6a49; }
+
+button { font-family: inherit; }
+
+input, select, textarea { font-family: inherit; }
+
+input::placeholder, textarea::placeholder { color: #a89685; }
+
+.img-slot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #efe6da;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+.img-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-slot-empty { font-size: 12px; color: #8a7f72; text-align: center; padding: 8px; pointer-events: none; }
+.img-slot.drag-over { outline: 2px dashed #c9a27a; outline-offset: -4px; }

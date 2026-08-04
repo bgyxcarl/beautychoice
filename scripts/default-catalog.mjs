@@ -1,0 +1,123 @@
+// Seed-only data: the original 60-product default catalog, used exclusively by
+// generate-seed-sql.mjs to produce supabase/02_seed_products.sql. Not imported
+// by the live app (products now live in Supabase, not this file).
+import { CATEGORIES } from '../src/products-data.js';
+
+const CODE = { almond: 'BCMAL', coffin: 'BCMCF', duck: 'BCMDS', 'french-regular': 'BCMFR', 'french-short': 'BCMFR', nude: 'BCMND', plain: 'BCMPL', 'short-squoval': 'BCMSS' };
+const NUMS = {
+  almond: Array.from({ length: 19 }, (_, i) => i + 1),
+  coffin: [1, 2],
+  duck: [1, 2, 3, 4, 5, 6, 7],
+  'french-regular': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 19],
+  'french-short': [100, 101, 102, 103, 104, 105, 106, 107],
+  nude: [1],
+  plain: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  'short-squoval': [1, 2],
+};
+const PRICE = { almond: 28, coffin: 30, duck: 26, 'french-regular': 27, 'french-short': 25, nude: 22, plain: 24, 'short-squoval': 23 };
+
+// per-item name + description in CN / EN / FR, in the same order as NUMS[key]
+const ITEMS = {
+  almond: [
+    { cn: '酒红鎏金', en: 'Wine Gold', fr: 'Or Vin', d: ['酒红色打底，手绘暗色花朵与黑色宝石点缀，金线勾边，整体华丽偏正式。', 'Deep wine base with hand-painted dark florals, black stones and fine gold outlines — formal and richly detailed.', 'Base bordeaux avec fleurs sombres peintes à la main, pierres noires et fins liserés dorés — chic et raffiné.'] },
+    { cn: '珊瑚星辰贝', en: 'Coral Starlight', fr: 'Étoile Corail', d: ['珊瑚粉打底，金色海星与浅蓝贝壳纹交织，带一点海边度假的松弛感。', 'Coral pink base with gold starfish charms and pale blue shell strokes, easy beach-holiday mood.', 'Base corail avec étoiles de mer dorées et motifs coquillage bleu pâle, esprit vacances balnéaires.'] },
+    { cn: '绿松石羽翼', en: 'Turquoise Wing', fr: 'Aile Turquoise', d: ['绿松石色打底，白色法式尖搭配羽毛纹拉丝，清爽又带一点光泽。', 'Turquoise base with white French tips and feather-like brushed lines — fresh with a soft shimmer.', 'Base turquoise, pointes françaises blanches et traits plumés — frais avec un léger éclat.'] },
+    { cn: '蝴蝶粉彩', en: 'Butterfly Pastel', fr: 'Papillon Pastel', d: ['粉蓝双色打底，贴合手绘蝴蝶与波点，甜而不腻的少女感设计。', 'Soft pink-and-blue base with painted butterflies and dots — sweet without being overdone.', 'Base rose et bleu pastel, papillons peints et pois — doux sans excès.'] },
+    { cn: '珍珠鎏金', en: 'Pearl Gilt', fr: 'Perle Dorée', d: ['珍珠白雕花甲面搭配裸粉打底，金色星形与珍珠饰点缀，精致耐看。', 'Carved pearl-white nails paired with a nude pink base, gold stars and pearl accents for a refined finish.', 'Ongles blanc nacré sculptés sur base rose nude, étoiles dorées et perles — un fini raffiné.'] },
+    { cn: '黑白瓢虫', en: 'Ladybug Noir', fr: 'Coccinelle Noire', d: ['米白打底配黑色波点与蝴蝶结，点缀迷你瓢虫贴花，俏皮复古。', 'Cream base with black polka dots and bows, tiny ladybug charms for a playful retro touch.', 'Base crème à pois noirs et nœuds, petites coccinelles — une touche rétro et espiègle.'] },
+    { cn: '柠糖奶油', en: 'Lemon Cream', fr: 'Crème Citron', d: ['柠檬黄与奶白拼色，甲面雕刻扇形纹路，光泽感强，清甜可口。', 'Lemon yellow meets creamy white with carved fan-shaped textures — glossy and sweetly refreshing.', 'Jaune citron et blanc crème, motifs en éventail sculptés — brillant et doux.'] },
+    { cn: '红勾雅豹', en: 'Scarlet Leopard', fr: 'Léopard Écarlate', d: ['裸粉打底手绘暗红豹纹线条，搭配水钻与立体花朵，个性中带一点优雅。', 'Nude base with hand-drawn burgundy leopard lines, rhinestones and dimensional flowers — bold yet elegant.', 'Base nude, motifs léopard bordeaux dessinés à la main, strass et fleurs en relief — audacieux et élégant.'] },
+    { cn: '春日樱语', en: 'Spring Cherry', fr: 'Cerisier Printanier', d: ['白粉打底满饰立体樱花与嫩绿枝叶，水钻点缀，春日限定的清新款。', 'White-and-pink base covered in dimensional cherry blossoms and soft green leaves with rhinestone accents.', 'Base blanc et rose couverte de fleurs de cerisier en relief et feuilles vertes, touches de strass.'] },
+    { cn: '墨白羽纹', en: 'Ink Feather', fr: "Plume d'Encre", d: ['纯白与纯黑一深一浅配对，雕刻羽毛纹理，简洁又有戏剧张力。', 'A stark white-and-black pairing with carved feather textures — minimal yet dramatic.', 'Duo blanc et noir contrasté, textures de plumes sculptées — minimal mais théâtral.'] },
+    { cn: '摩卡花语', en: 'Mocha Bloom', fr: 'Fleur Moka', d: ['奶咖色打底，手绘咖啡豆与格纹花朵，秋冬耐看的暖调款。', 'Milky mocha base with hand-painted coffee beans and plaid florals — a warm, wearable autumn tone.', 'Base moka lacté, grains de café et fleurs à carreaux peints à la main — une teinte automnale chaleureuse.'] },
+    { cn: '云朵茉莉', en: 'Jasmine Cloud', fr: 'Nuage de Jasmin', d: ['奶油色与雾霭蓝拼接，金色珠饰与茉莉花点缀，温柔又干净。', 'Creamy base meets misty blue with gold beads and jasmine-flower accents — gentle and clean.', 'Base crème et bleu brumeux, perles dorées et fleurs de jasmin — doux et épuré.'] },
+    { cn: '秋日拾光', en: 'Autumn Harvest', fr: "Récolte d'Automne", d: ['一套一款风格，红叶、瓢虫、蜜蜂与花朵手绘拼接，秋天氛围感满满。', 'A mixed set of hand-painted maple leaves, ladybugs, bees and flowers — full of autumn character.', 'Un assortiment peint à la main : feuilles d\'érable, coccinelles, abeilles et fleurs — l\'esprit automne.'] },
+    { cn: '热带花园', en: 'Tropical Garden', fr: 'Jardin Tropical', d: ['橙绿蓝多色拼接，手绘热带花卡与条纹，明快大胆的度假款。', 'A bold multicolor mix of orange, green and blue with tropical florals and stripes — vacation energy.', 'Mélange audacieux orange, vert et bleu, fleurs tropicales et rayures — esprit vacances.'] },
+    { cn: '草莓花园', en: 'Strawberry Garden', fr: 'Jardin Fraise', d: ['珊瑚色打底满绘草莓与白色小花，甜美系的招牌款式。', 'Coral base covered in painted strawberries and tiny white flowers — our signature sweet design.', 'Base corail couverte de fraises peintes et petites fleurs blanches — notre modèle signature et gourmand.'] },
+    { cn: '雪梨拼糖', en: 'Candy Bloom', fr: 'Fleur Bonbon', d: ['黑色与糖粉色拼接，手绘小花与蓝白条纹，甜酷混搭的趣味款。', 'Black paired with candy pink, painted flowers and blue-white stripes — a playful sweet-meets-edgy mix.', 'Noir associé au rose bonbon, fleurs peintes et rayures bleu-blanc — un mélange sucré-audacieux.'] },
+    { cn: '贝壳珊瑚', en: 'Coral Shell', fr: 'Coquillage Corail', d: ['珍珠白与珊瑚色拼接，雕刻贝壳纹理搭配细珠点缀，温柔的海洋感。', 'Pearl white meets coral with carved shell textures and tiny beads — a gentle ocean feel.', 'Blanc nacré et corail, textures coquillage sculptées et perles fines — une douce évocation marine.'] },
+    { cn: '糖果宝石', en: 'Candy Gem', fr: 'Bijou Bonbon', d: ['奶白打底，绿蓝紫橙多彩宝石镶嵌，明亮跳跃的糖果色系。', 'Milky white base studded with green, blue, purple and orange gems — bright, candy-colored fun.', 'Base blanc laiteux, pierres vertes, bleues, violettes et orange — un esprit bonbon éclatant.'] },
+    { cn: '草莓恋人', en: 'Strawberry Sweetheart', fr: 'Amour Fraise', d: ['深红与嫩粉拼接，立体草莓与樱桃手绘，甜度加倍的限定款。', 'Deep red meets soft pink with dimensional strawberries and cherries — extra-sweet and limited in feel.', 'Rouge profond et rose tendre, fraises et cerises en relief — un modèle doublement gourmand.'] },
+  ],
+  coffin: [
+    { cn: '金链胭脂', en: 'Gilded Blush', fr: 'Blush Doré', d: ['裸粉打底，金色波浪链条与水钻镶嵌，一枚暗红花朵点睛。', 'Nude pink base with gold wavy chains and rhinestones, one deep red flower as the focal point.', 'Base rose nude, chaînes ondulées dorées et strass, une fleur bordeaux en point focal.'] },
+    { cn: '黑尖钻光', en: 'Noir Sparkle Tip', fr: 'Pointe Noire Scintillante', d: ['粉色打底配黑色尖端，缀满彩色水钻，甜辣兼具的法式变体。', 'Pink base with black tips and scattered iridescent rhinestones — a sweet-meets-edgy French twist.', 'Base rose à pointes noires semées de strass irisés — une French sucrée-audacieuse.'] },
+  ],
+  duck: [
+    { cn: '薄荷花园', en: 'Mint Garden', fr: 'Jardin Menthe', d: ['薄荷蓝打底，立体白色花朵与珍珠点缀，清凉干净的春夏款。', 'Mint blue base with dimensional white flowers and pearl accents — cool and clean for spring/summer.', 'Base bleu menthe, fleurs blanches en relief et perles — frais et épuré pour le printemps-été.'] },
+    { cn: '紫罗兰之夜', en: 'Violet Night', fr: 'Nuit Violette', d: ['裸色打底配黑色尖端，紫色立体花朵与银钻链条，优雅带一点戏剧感。', 'Nude base with black tips, violet dimensional flowers and silver chain rhinestones — elegant with drama.', 'Base nude à pointes noires, fleurs violettes en relief et chaînes de strass argentées — élégance théâtrale.'] },
+    { cn: '粉钻爱心', en: 'Pink Heart Gem', fr: 'Cœur de Strass', d: ['浅粉打底，蝴蝶与爱心水钻贴片点缀，甜美又不失精致。', 'Soft pink base with butterfly and heart-shaped rhinestone charms — sweet yet refined.', 'Base rose pâle, papillons et strass en forme de cœur — doux et raffiné.'] },
+    { cn: '珊瑚金蕊', en: 'Coral Gold Bloom', fr: "Fleur d'Or Corail", d: ['珊瑚粉打底，金色叶片纹理与立体花朵，暖调又精致。', 'Coral pink base with gold leaf textures and dimensional flowers — warm and detailed.', 'Base corail, textures de feuilles dorées et fleurs en relief — chaleureux et raffiné.'] },
+    { cn: '浪漫蝴蝶结', en: 'Romantic Bow', fr: 'Nœud Romantique', d: ['裸粉打底满饰立体蝴蝶结与珍珠，浪漫甜美的约会款。', 'Nude pink base covered in dimensional bows and pearls — romantic and date-night sweet.', 'Base rose nude couverte de nœuds en relief et de perles — romantique, idéal pour un rendez-vous.'] },
+    { cn: '藤蔓浮雕', en: 'Vine Relief', fr: 'Relief de Vigne', d: ['裸棕色打底，雕刻藤蔓纹理，哑光质感低调耐看。', 'Nude brown base with carved vine textures — matte, understated and easy to wear.', 'Base brun nude, motifs de vigne sculptés — mat, discret et facile à porter.'] },
+    { cn: '幸运草语', en: 'Lucky Clover', fr: 'Trèfle Chance', d: ['米白打底，绿色四叶草与珍珠花朵点缀，金色星星增添亮点。', 'Cream base with green clover motifs and pearl flowers, gold stars for extra sparkle.', 'Base crème, motifs de trèfle vert et fleurs nacrées, étoiles dorées pour l\'éclat.'] },
+  ],
+  'french-regular': [
+    { cn: '蜜金法式钻', en: 'Honey Gold French', fr: 'French Or Miel', d: ['裸粉打底法式甲尖，金色波浪链与水钻镶边，低调闪光。', 'Nude pink French tips lined with gold wavy chains and rhinestones — a quiet shimmer.', 'Pointes françaises nude bordées de chaînes ondulées dorées et de strass — un éclat discret.'] },
+    { cn: '金丝法式', en: 'Golden Thread French', fr: "French Fil d'Or", d: ['粉色法式打底，纤细金线勾勒波浪纹路，配单颗水钻。', 'Pink French base traced with fine gold wavy threads and a single rhinestone accent.', 'Base French rose tracée de fins fils dorés ondulés, une touche de strass.'] },
+    { cn: '湖水法式', en: 'Lagoon French', fr: 'French Lagon', d: ['湖蓝色法式尖搭配白色雕花与珍珠，清透又有细节。', 'Lagoon-blue French tips with carved white detailing and pearls — clear yet detailed.', 'Pointes françaises bleu lagon, motifs blancs sculptés et perles — clair et détaillé.'] },
+    { cn: '蝶舞法式', en: 'Butterfly French', fr: 'French Papillon', d: ['粉白法式打底，手绘蝴蝶与波点穿插，俏皮又优雅。', 'Pink-and-white French base with painted butterflies and dots woven throughout — playful and elegant.', 'Base French rose et blanc, papillons peints et pois entremêlés — espiègle et élégant.'] },
+    { cn: '牛奶法式', en: 'Milk French', fr: 'French au Lait', d: ['奶白法式打底，线条干净利落，日常百搭的基础款。', 'Milky white French base with clean, crisp lines — an everyday wearable basic.', 'Base French blanc laiteux, lignes nettes — un basique facile à porter au quotidien.'] },
+    { cn: '蜜桃金叶法式', en: 'Peach Gold Leaf French', fr: "French Feuille d'Or Pêche", d: ['蜜桃粉法式打底，金色叶片与水钻点缀，暖调又精致。', 'Peachy pink French base with gold leaf accents and rhinestones — warm and detailed.', 'Base French rose pêche, feuilles dorées et strass — chaleureux et raffiné.'] },
+    { cn: '苜蓿法式', en: 'Clover French', fr: 'French Trèfle', d: ['米黄法式打底，绿色苜蓿与白色小花，金色星星点缀，清新田园风。', 'Beige French base with green clover and tiny white flowers, gold stars for accent — fresh and pastoral.', 'Base French beige, trèfle vert et petites fleurs blanches, étoiles dorées — un esprit champêtre frais.'] },
+    { cn: '薄荷法式', en: 'Mint French', fr: 'French Menthe', d: ['裸色法式打底配薄荷绿甲尖，简洁清爽的双色搭配。', 'Nude French base paired with mint green tips — a clean, refreshing two-tone combo.', 'Base French nude associée à des pointes menthe — un duo net et rafraîchissant.'] },
+    { cn: '摩卡渐变法式', en: 'Mocha Ombré French', fr: 'French Ombré Moka', d: ['裸色渐变至摩卡棕的法式尖，过渡柔和，适合日常通勤。', 'Nude-to-mocha-brown ombré French tips with a soft gradient — great for everyday wear.', 'Pointes françaises en dégradé nude vers brun moka — douceur idéale pour le quotidien.'] },
+    { cn: '蜻蜓蝴蝶结法式', en: 'Dragonfly Bow French', fr: 'French Nœud Libellule', d: ['灰棕色打底，白色蜻蜓纹样与粉色蝴蝶结，珍珠水钻点缀，复古甜美。', 'Taupe base with white dragonfly motifs and pink bows, pearls and rhinestones — vintage and sweet.', 'Base taupe, motifs de libellule blancs et nœuds roses, perles et strass — rétro et doux.'] },
+    { cn: '经典黑框法式', en: 'Classic Noir-Edge French', fr: 'French Classique Bordure Noire', d: ['裸色法式打底，甲尖以细黑线勾边，干净利落的经典款。', 'Nude French base with a fine black outline at the tip — a clean, classic staple.', 'Base French nude à liseré noir fin sur la pointe — un classique net et intemporel.'] },
+    { cn: '金线法式', en: 'Golden Line French', fr: 'French Ligne Dorée', d: ['裸色打底，极简的金色波浪线勾勒轮廓，低调高级。', 'Nude base traced with a minimal gold wavy line — understated and refined.', 'Base nude tracée d\'une ligne dorée ondulée minimaliste — discret et raffiné.'] },
+  ],
+  'french-short': [
+    { cn: '黑白蝶结法式', en: 'Noir Bow French', fr: 'French Nœud Noir', d: ['米白短款法式，黑色波点与蝴蝶结点缀，一枚瓢虫贴花增添趣味。', 'Cream short French with black polka dots and bows, a tiny ladybug for fun.', 'French courte crème à pois et nœuds noirs, une coccinelle pour la touche ludique.'] },
+    { cn: '虎纹法式', en: 'Tiger French', fr: 'French Tigre', d: ['裸色短款法式，手绘虎纹线条与金色圆点，个性又不夸张。', 'Nude short French with hand-painted tiger stripes and gold dots — bold but wearable.', 'French courte nude, rayures tigrées peintes à la main et points dorés — audacieux mais portable.'] },
+    { cn: '黑金法式', en: 'Noir Gold French', fr: 'French Noir Or', d: ['裸色短款法式配黑色尖端，金色水钻点缀甲缘，精致利落。', 'Nude short French with black tips and gold rhinestone accents along the edge — sharp and refined.', 'French courte nude à pointes noires, strass dorés sur le bord — net et raffiné.'] },
+    { cn: '银点法式', en: 'Silver Dot French', fr: 'French Pois Argenté', d: ['裸色短款法式，银色闪粉波点点缀，日常又带一点闪耀。', 'Nude short French dotted with silver glitter — everyday wear with a hint of sparkle.', 'French courte nude semée de pois pailletés argentés — quotidien avec une touche scintillante.'] },
+    { cn: '金环法式', en: 'Gold Ring French', fr: 'French Anneau Doré', d: ['裸色短款法式，金色圆环与水钻镶嵌，简约又有细节。', 'Nude short French with gold ring shapes and rhinestone inlays — simple with fine detail.', 'French courte nude, anneaux dorés et strass incrustés — simple mais détaillé.'] },
+    { cn: '心形法式', en: 'Heart French', fr: 'French Cœur', d: ['裸色短款法式配黑色尖端，银色爱心水钻点缀甲缘。', 'Nude short French with black tips and silver heart-shaped rhinestones along the edge.', 'French courte nude à pointes noires, strass en cœur argentés sur le bord.'] },
+    { cn: '豹纹法式', en: 'Leopard French', fr: 'French Léopard', d: ['裸色短款法式，手绘豹纹点缀甲尖，日常又带一点野性。', 'Nude short French with hand-painted leopard spots at the tip — everyday with a wild edge.', 'French courte nude, taches léopard peintes à la pointe — quotidien avec une touche sauvage.'] },
+    { cn: '红尖法式', en: 'Red Tip French', fr: 'French Pointe Rouge', d: ['裸色短款法式配红色甲尖，水钻点缀，经典红配色的清爽版本。', 'Nude short French with red tips and rhinestone accents — a fresh take on classic red.', 'French courte nude à pointes rouges et strass — une version fraîche du rouge classique.'] },
+  ],
+  nude: [
+    { cn: '裸调初见', en: 'First Nude', fr: 'Premier Nude', d: ['纯粹裸色打底，哑光质感，任何场合都能安心佩戴的基础款。', 'A pure nude base with a soft matte finish — a foundational shade for any occasion.', 'Base nude pure, fini mat doux — une teinte fondamentale pour toutes les occasions.'] },
+  ],
+  plain: [
+    { cn: '燕麦裸', en: 'Oat Nude', fr: 'Nude Avoine', d: ['燕麦棕色系打底，哑光质感，低调百搭的日常色。', 'An oat-brown matte base — understated and easy to pair with anything.', 'Base brun avoine mate — discrète et facile à assortir.'] },
+    { cn: '橄榄绿意', en: 'Olive Grove', fr: 'Vert Olive', d: ['橄榄绿高光打底，饱和干净，秋冬耐看的个性色。', 'A glossy, saturated olive green — a distinctive shade that suits autumn/winter.', 'Vert olive brillant et saturé — une teinte marquante pour l\'automne-hiver.'] },
+    { cn: '薰衣紫', en: 'Lavender Dusk', fr: 'Lavande Crépuscule', d: ['薰衣草紫高光打底，柔和又不失存在感。', 'A glossy lavender purple — soft, yet still makes a statement.', 'Violet lavande brillant — doux, mais avec du caractère.'] },
+    { cn: '深海蓝调', en: 'Deep Sea Blue', fr: 'Bleu Abyssal', d: ['深蓝绿色高光打底，浓郁饱满，适合喜欢深色系的佩戴者。', 'A rich, saturated deep teal-blue — for those who love a darker palette.', 'Bleu-vert profond et saturé — pour celles qui aiment les teintes foncées.'] },
+    { cn: '马卡龙三色', en: 'Macaron Trio', fr: 'Trio Macaron', d: ['粉、黄、薄荷绿三色轮换搭配，甜美活泼的马卡龙色系。', 'A rotating mix of pink, yellow and mint green — a sweet, playful macaron palette.', 'Un mélange rotatif de rose, jaune et vert menthe — une palette macaron douce et ludique.'] },
+    { cn: '晴空蓝', en: 'Sky Blue', fr: 'Bleu Ciel', d: ['天空蓝高光打底，明亮清爽，夏日感十足。', 'A bright, glossy sky blue — clean and full of summer energy.', 'Bleu ciel brillant et lumineux — frais et plein d\'énergie estivale.'] },
+    { cn: '奶油白', en: 'Cream White', fr: 'Blanc Crème', d: ['奶油白高光打底，干净纯粹，适合任何搭配。', 'A clean, glossy cream white — pure and easy to style with anything.', 'Blanc crème brillant et net — pur et facile à assortir.'] },
+    { cn: '黑曜辰', en: 'Onyx Black', fr: 'Noir Onyx', d: ['纯黑高光打底，浓郁有质感，个性鲜明的基础色。', 'A rich, glossy pure black — bold and full of character.', 'Noir pur et brillant — audacieux et plein de caractère.'] },
+    { cn: '摩卡棕', en: 'Mocha Brown', fr: 'Brun Moka', d: ['深摩卡棕高光打底，浓郁暖调，秋冬耐看的基础色。', 'A rich, glossy mocha brown — warm and wearable through autumn/winter.', 'Brun moka riche et brillant — chaleureux, idéal pour l\'automne-hiver.'] },
+  ],
+  'short-squoval': [
+    { cn: '马卡龙点点', en: 'Macaron Dots', fr: 'Pois Macaron', d: ['薄荷绿、红、黄多色拼接，波点与法式尖穿插，活泼可爱。', 'A playful mix of mint, red and yellow with dots and French tips woven throughout.', 'Un mélange ludique de menthe, rouge et jaune, pois et pointes françaises entremêlés.'] },
+    { cn: '星夜马卡龙', en: 'Starry Macaron', fr: 'Macaron Étoilé', d: ['黑色与薄荷绿拼接，白色星星与条纹点缀，甜酷风格的短款设计。', 'Black paired with mint green, dotted with white stars and stripes — a sweet-meets-edgy short design.', 'Noir associé au vert menthe, étoiles et rayures blanches — un design court sucré-audacieux.'] },
+  ],
+};
+
+export function buildDefaultProducts() {
+  const list = [];
+  CATEGORIES.forEach(cat => {
+    NUMS[cat.key].forEach((n, i) => {
+      const num = String(n).padStart(3, '0');
+      const it = (ITEMS[cat.key] && ITEMS[cat.key][i]) || { cn: cat.label + ' No.' + num, en: '', fr: '', d: ['', '', ''] };
+      list.push({
+        id: cat.key + '-' + num,
+        category: cat.key,
+        categoryLabel: cat.label,
+        categoryLabelEn: cat.labelEn,
+        categoryLabelFr: cat.labelFr,
+        name: it.cn,
+        nameEn: it.en,
+        nameFr: it.fr,
+        price: PRICE[cat.key],
+        img: 'assets/products/' + cat.key + '/' + CODE[cat.key] + num + '.jpg',
+        descCn: it.d[0],
+        descEn: it.d[1],
+        descFr: it.d[2],
+      });
+    });
+  });
+  return list;
+}
