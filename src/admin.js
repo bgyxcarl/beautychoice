@@ -153,7 +153,7 @@ function imgCell(p) {
 
 function sidebar() {
   return `
-  <div style="width:220px;flex-shrink:0;background:#2b2420;color:#d8cdbd;padding:32px 24px;min-height:100vh;">
+  <div class="admin-sidebar" style="background:#2b2420;color:#d8cdbd;padding:32px 24px;">
     <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#f1e9df;">beautychoice</div>
     <div style="font-size:12px;color:#8a7f72;margin-top:4px;letter-spacing:0.05em;text-transform:uppercase;">后台管理</div>
     <div style="margin-top:36px;display:flex;flex-direction:column;gap:4px;">
@@ -169,8 +169,8 @@ function sidebar() {
 
 function renderLogin() {
   app.innerHTML = `
-  <div style="font-family:'Work Sans',sans-serif;background:#f8f4ef;min-height:100vh;display:flex;align-items:center;justify-content:center;">
-    <div style="width:360px;padding:40px;background:#fff;border:1px solid #e3d9cc;">
+  <div style="font-family:'Work Sans',sans-serif;background:#f8f4ef;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div class="login-box" style="padding:40px;background:#fff;border:1px solid #e3d9cc;">
       <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#2b2420;">beautychoice</div>
       <div style="font-size:13px;color:#8a7f72;margin-top:4px;margin-bottom:28px;">后台管理登录</div>
       <div style="display:flex;flex-direction:column;gap:14px;">
@@ -199,7 +199,7 @@ function renderProductsTab() {
     .map((f) => `<div data-action="setCategoryFilter" data-cat="${f.key}" style="cursor:pointer;font-size:14px;color:${f.key === state.categoryFilter ? '#c9a27a' : '#2b2420'};font-weight:${f.key === state.categoryFilter ? 700 : 500};white-space:nowrap;">${esc(f.label)}</div>`).join('');
 
   const rows = filtered.map((p) => `
-    <div style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 80px;gap:16px;padding:14px 0;border-bottom:1px solid #ece3d6;align-items:center;">
+    <div class="admin-row-min" style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 80px;gap:16px;padding:14px 0;border-bottom:1px solid #ece3d6;align-items:center;">
       <div style="width:56px;height:56px;overflow:hidden;background:#efe6da;">${imgCell(p)}</div>
       <div>
         <input data-field="name" data-id="${esc(p.id)}" value="${esc(p.name)}" style="width:100%;padding:8px 10px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
@@ -216,7 +216,7 @@ function renderProductsTab() {
     </div>`).join('');
 
   return `
-    <div style="display:flex;align-items:baseline;justify-content:space-between;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;">商品管理</div>
         <div style="font-size:14px;color:#8a7f72;margin-top:6px;">共 ${products.length} 款商品 · ${CATEGORIES.length} 个分类</div>
@@ -227,7 +227,7 @@ function renderProductsTab() {
     ${state.showAddForm ? `
     <div style="background:#efe6da;padding:28px;margin-top:24px;">
       <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">新增商品</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div style="display:grid;grid-template-columns:var(--admin-form-cols);gap:16px;">
         <div>
           <div style="font-size:12px;color:#8a7f72;margin-bottom:6px;">名称</div>
           <input data-field="newName" value="${esc(state.newName)}" placeholder="例如：珊瑚渐变 No.01" style="width:100%;padding:12px;border:1px solid #d8cdbd;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
@@ -252,8 +252,8 @@ function renderProductsTab() {
 
     <div style="display:flex;gap:20px;margin-top:32px;border-bottom:1px solid #e3d9cc;padding-bottom:16px;flex-wrap:wrap;">${filterTabs}</div>
 
-    <div style="margin-top:8px;">
-      <div style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 80px;gap:16px;padding:14px 0;border-bottom:1px solid #e3d9cc;font-size:12px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">
+    <div class="admin-table-scroll" style="margin-top:8px;">
+      <div class="admin-row-min" style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 80px;gap:16px;padding:14px 0;border-bottom:1px solid #e3d9cc;font-size:12px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">
         <div>图片</div><div>名称</div><div>分类</div><div>价格</div><div>操作</div>
       </div>
       ${rows}
@@ -276,13 +276,13 @@ function renderOrdersTab() {
     const shipped = o.status === 'shipped';
     return `
     <div style="border-bottom:1px solid #ece3d6;padding:20px 0;">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;">
         <div style="font-size:14px;font-weight:600;">${esc(o.customer_name)} · ${esc(o.customer_email)}</div>
         <div style="font-size:12px;color:#8a7f72;">${fmtDate(o.created_at)}</div>
       </div>
       <div style="font-size:13px;color:#4a3f37;margin-top:8px;">${itemsSummary}</div>
       <div style="font-size:13px;color:#8a7f72;margin-top:6px;">${esc(o.address)}, ${esc(o.city)} ${esc(o.zip)}, ${esc(o.country)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:10px;">
         <div style="font-size:13px;color:#8a7f72;">PayPal 订单号：${esc(o.paypal_order_id || '-')} · 总计 $${Number(o.total).toFixed(2)}</div>
         <button data-action="toggleOrderStatus" data-id="${esc(o.id)}" data-current="${esc(o.status)}" style="padding:8px 14px;background:${shipped ? '#efe6da' : '#2b2420'};color:${shipped ? '#2b2420' : '#f8f4ef'};border:none;font-size:12px;font-weight:600;cursor:pointer;">${shipped ? '已发货' : '标记为已发货'}</button>
       </div>
@@ -305,9 +305,9 @@ function render() {
 
   const content = state.tab === 'orders' ? renderOrdersTab() : renderProductsTab();
   app.innerHTML = `
-  <div style="font-family:'Work Sans',sans-serif;background:#f8f4ef;min-height:100vh;color:#2b2420;display:flex;">
+  <div class="admin-shell" style="font-family:'Work Sans',sans-serif;background:#f8f4ef;min-height:100vh;color:#2b2420;">
     ${sidebar()}
-    <div style="flex:1;padding:48px 56px;max-width:1200px;">${content}</div>
+    <div class="admin-content" style="padding:var(--pad-section-v-md) var(--pad-page);">${content}</div>
   </div>`;
 }
 

@@ -23,6 +23,7 @@ const state = {
   shipping: { name: '', email: '', address: '', city: '', zip: '', country: '' },
   contact: { name: '', email: '', message: '' },
   contactStatus: null, // 'sending' | 'sent' | 'error'
+  mobileNavOpen: false,
 };
 
 function esc(s) {
@@ -41,6 +42,7 @@ function fmtPrice(n) {
 
 function goTo(page) {
   state.page = page;
+  state.mobileNavOpen = false;
   render();
   window.scrollTo(0, 0);
 }
@@ -139,6 +141,7 @@ function renderHeader(d) {
     { key: 'contact', label: T('navContact'), page: 'contact' },
   ];
   const navItems = navBase.map((n) => `<div data-action="goTo" data-page="${n.page}" style="cursor:pointer;font-size:15px;color:${n.page === state.page ? '#c9a27a' : '#2b2420'};font-weight:${n.page === state.page ? 700 : 500};">${esc(n.label)}</div>`).join('');
+  const mobileNavItems = navBase.map((n) => `<div class="mobile-nav-item" data-action="goTo" data-page="${n.page}" style="color:${n.page === state.page ? '#c9a27a' : '#2b2420'};font-weight:${n.page === state.page ? 700 : 500};">${esc(n.label)}</div>`).join('');
   const langList = [{ key: 'zh', label: '中' }, { key: 'en', label: 'EN' }, { key: 'fr', label: 'FR' }];
   const langOptions = langList.map((l) => `<div data-action="setLang" data-lang="${l.key}" style="cursor:pointer;font-size:12px;padding:4px 8px;color:${l.key === state.lang ? '#c9a27a' : '#2b2420'};font-weight:${l.key === state.lang ? 700 : 500};border:1px solid ${l.key === state.lang ? '#c9a27a' : '#e3d9cc'};">${l.label}</div>`).join('');
 
@@ -147,16 +150,21 @@ function renderHeader(d) {
     ${T('promoBar', { amt: fmtPrice(FREE_SHIP_THRESHOLD) })}
   </div>
   <div style="position:sticky;top:0;z-index:20;background:#f8f4ef;border-bottom:1px solid #e3d9cc;">
-    <div style="max-width:1280px;margin:0 auto;padding:22px 48px;display:flex;align-items:center;justify-content:space-between;">
-      <div data-action="goTo" data-page="home" style="cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;letter-spacing:0.01em;color:#2b2420;">beautychoice</div>
-      <div style="display:flex;gap:36px;">${navItems}</div>
-      <div style="display:flex;align-items:center;gap:24px;">
-        <div style="display:flex;gap:6px;">${langOptions}</div>
+    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-header-v) var(--pad-page);display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <div data-action="goTo" data-page="home" style="cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;letter-spacing:0.01em;color:#2b2420;white-space:nowrap;">beautychoice</div>
+      <div class="nav-desktop" style="gap:36px;">${navItems}</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="lang-switch-desktop" style="gap:6px;">${langOptions}</div>
         <div data-action="goTo" data-page="cart" style="cursor:pointer;position:relative;display:flex;align-items:center;gap:8px;font-size:15px;">
           <span>${T('cart')}</span>
           ${d.cartCount > 0 ? `<span style="background:#c9a27a;color:#231d19;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${d.cartCount}</span>` : ''}
         </div>
+        <button class="hamburger-btn" data-action="toggleMobileNav" aria-label="菜单">${state.mobileNavOpen ? '✕' : '☰'}</button>
       </div>
+    </div>
+    <div class="mobile-nav-panel${state.mobileNavOpen ? ' open' : ''}">
+      ${mobileNavItems}
+      <div class="mobile-lang-row">${langOptions}</div>
     </div>
   </div>`;
 }
@@ -165,34 +173,34 @@ function renderHome(d) {
   const hero = d.allProducts.find((p) => p.id === 'almond-015') || d.allProducts[0];
   return `
   <div>
-    <div style="position:relative;width:100%;height:640px;overflow:hidden;">
+    <div style="position:relative;width:100%;height:var(--hero-height);overflow:hidden;">
       ${hero && hero.img ? `<img src="${esc(hero.img)}" alt="beautychoice" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;" />` : ''}
       <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(20,16,14,0) 35%, rgba(20,16,14,0.65) 100%);pointer-events:none;"></div>
-      <div style="position:absolute;left:48px;bottom:64px;max-width:560px;">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:700;line-height:1.05;color:#fdfaf6;">${T('heroTitle1')}<br>${T('heroTitle2')}</div>
+      <div style="position:absolute;left:var(--pad-page);right:var(--pad-page);bottom:var(--pad-header-v);max-width:560px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-hero);font-weight:700;line-height:1.05;color:#fdfaf6;">${T('heroTitle1')}<br>${T('heroTitle2')}</div>
         <div style="font-size:17px;color:#f1e9df;margin-top:16px;">${T('heroSubtitle')}</div>
         <button data-action="goTo" data-page="shop" style="margin-top:28px;padding:15px 34px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;letter-spacing:0.02em;cursor:pointer;">${T('heroButton')}</button>
       </div>
     </div>
 
-    <div style="max-width:1280px;margin:0 auto;padding:96px 48px 80px;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:40px;">
+    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-lg) var(--pad-page) var(--pad-section-v-md);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--gap-md);flex-wrap:wrap;gap:12px;">
         <div>
           <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">${T('featuredLabel')}</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:8px;">${T('featuredTitle')}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;">${T('featuredTitle')}</div>
         </div>
         <a href="#" data-action="goTo" data-page="shop" style="font-size:14px;">${T('viewAll')}</a>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;">
+      <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);">
         ${d.featuredProducts.map(productCard).join('')}
       </div>
     </div>
 
-    <div style="background:#efe6da;padding:88px 48px;">
+    <div style="background:#efe6da;padding:var(--pad-section-v-lg) var(--pad-page);">
       <div style="max-width:1280px;margin:0 auto;">
         <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;text-align:center;">${T('categoryLabel')}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:8px;text-align:center;">${T('categoryTitle')}</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:48px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;text-align:center;">${T('categoryTitle')}</div>
+        <div style="display:grid;grid-template-columns:var(--cols-4);gap:var(--gap-md);margin-top:var(--gap-lg);">
           ${d.categoryCards.map((c) => `
             <div data-action="goCategory" data-cat="${c.key}" style="cursor:pointer;background:#f8f4ef;">
               <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">${imgTile(c.thumb, c.label)}</div>
@@ -205,10 +213,10 @@ function renderHome(d) {
       </div>
     </div>
 
-    <div style="max-width:1280px;margin:0 auto;padding:88px 48px;">
+    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-lg) var(--pad-page);">
       <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;text-align:center;">${T('reviewsLabel')}</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-top:8px;text-align:center;">${T('reviewsTitle')}</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:48px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;text-align:center;">${T('reviewsTitle')}</div>
+      <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);margin-top:var(--gap-lg);">
         ${d.teaserReviews.map((r) => `
           <div style="background:#efe6da;padding:32px;">
             <div style="font-size:15px;color:#4a3f37;line-height:1.6;">${esc(r.quote)}</div>
@@ -224,12 +232,12 @@ function renderHome(d) {
 
 function renderShop(d) {
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">${T('shopTitle')}</div>
-    <div style="display:flex;gap:24px;margin-top:32px;border-bottom:1px solid #e3d9cc;padding-bottom:20px;flex-wrap:wrap;">
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('shopTitle')}</div>
+    <div style="display:flex;gap:20px;margin-top:32px;border-bottom:1px solid #e3d9cc;padding-bottom:20px;flex-wrap:wrap;">
       ${d.categoryFilters.map((f) => `<div data-action="setCategoryFilter" data-cat="${f.key}" style="cursor:pointer;font-size:14px;color:${f.key === state.categoryFilter ? '#c9a27a' : '#2b2420'};font-weight:${f.key === state.categoryFilter ? 700 : 500};white-space:nowrap;">${esc(f.label)}</div>`).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:48px;">
+    <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);margin-top:var(--gap-lg);">
       ${d.filteredShopProducts.map(productCard).join('')}
     </div>
   </div>`;
@@ -238,7 +246,7 @@ function renderShop(d) {
 function renderProduct(d) {
   const p = d.selectedProduct;
   if (!p) {
-    return `<div style="max-width:1280px;margin:0 auto;padding:56px 48px 96px;">
+    return `<div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
       <a href="#" data-action="goTo" data-page="shop">${T('breadcrumbHome')}</a>
     </div>`;
   }
@@ -246,15 +254,15 @@ function renderProduct(d) {
     <div data-action="setSize" data-size="${sz}" style="cursor:pointer;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:1px solid ${sz === state.detailSize ? '#c9a27a' : '#e3d9cc'};background:${sz === state.detailSize ? '#c9a27a' : '#fff'};color:${sz === state.detailSize ? '#231d19' : '#2b2420'};font-size:14px;font-weight:600;">${sz}</div>`).join('');
 
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:56px 48px 96px;">
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
     <div style="font-size:13px;color:#8a7f72;">
       <a href="#" data-action="goTo" data-page="home">${T('breadcrumbHome')}</a> / <a href="#" data-action="goTo" data-page="shop">${T('shopTitle')}</a> / ${esc(p.displayName)}
     </div>
-    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:64px;margin-top:32px;">
+    <div style="display:grid;grid-template-columns:var(--two-col);gap:var(--gap-xl);margin-top:32px;">
       <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">${imgTile(p.img, p.displayName)}</div>
       <div>
         <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">${esc(p.displayCategoryLabel)}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;margin-top:10px;">${esc(p.displayName)}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;margin-top:10px;">${esc(p.displayName)}</div>
         <div style="font-size:22px;margin-top:14px;">${p.priceLabel}</div>
         <div style="font-size:15px;line-height:1.7;color:#4a3f37;margin-top:24px;">${esc(p.displayDesc)}</div>
 
@@ -280,9 +288,9 @@ function renderProduct(d) {
       </div>
     </div>
 
-    <div style="margin-top:88px;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin-bottom:32px;">${T('sameCategoryTitle')}</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:40px;">
+    <div style="margin-top:var(--pad-section-v-lg);">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin-bottom:var(--gap-md);">${T('sameCategoryTitle')}</div>
+      <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);">
         ${d.sameCategoryProducts.map(productCard).join('')}
       </div>
     </div>
@@ -292,8 +300,8 @@ function renderProduct(d) {
 function renderCart(d) {
   if (d.cartCount === 0) {
     return `
-    <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">${T('cartTitle')}</div>
+    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('cartTitle')}</div>
       <div style="text-align:center;padding:96px 0;">
         <div style="font-size:16px;color:#8a7f72;">${T('emptyCart')}</div>
         <button data-action="goTo" data-page="shop" style="margin-top:24px;padding:14px 32px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;cursor:pointer;">${T('goShopBtn')}</button>
@@ -301,14 +309,14 @@ function renderCart(d) {
     </div>`;
   }
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">${T('cartTitle')}</div>
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:64px;margin-top:40px;">
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('cartTitle')}</div>
+    <div style="display:grid;grid-template-columns:var(--cart-col);gap:var(--gap-xl);margin-top:40px;">
       <div>
         ${d.cartLines.map((l) => `
-          <div style="display:flex;gap:24px;align-items:center;padding:24px 0;border-bottom:1px solid #e3d9cc;">
-            <div style="width:96px;height:96px;overflow:hidden;flex-shrink:0;">${imgTile(l.product.img, l.product.displayName)}</div>
-            <div style="flex:1;">
+          <div style="display:flex;gap:20px;align-items:center;padding:24px 0;border-bottom:1px solid #e3d9cc;flex-wrap:wrap;">
+            <div class="cart-line-img" style="overflow:hidden;">${imgTile(l.product.img, l.product.displayName)}</div>
+            <div style="flex:1;min-width:160px;">
               <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;">${esc(l.product.displayName)}</div>
               <div style="font-size:13px;color:#8a7f72;margin-top:6px;">${esc(l.product.displayCategoryLabel)} · ${esc(l.size)}</div>
               <div style="margin-top:14px;display:flex;align-items:center;gap:16px;">
@@ -337,7 +345,7 @@ function renderCart(d) {
 function renderCheckout(d) {
   if (state.orderPlaced) {
     return `
-    <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
       <div style="text-align:center;padding:96px 0;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;">${T('orderPlacedTitle')}</div>
         <div style="font-size:15px;color:#4a3f37;margin-top:16px;">${T('orderPlacedText')}</div>
@@ -347,7 +355,7 @@ function renderCheckout(d) {
   }
   if (d.cartCount === 0) {
     return `
-    <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
+    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
       <div style="text-align:center;padding:96px 0;">
         <div style="font-size:16px;color:#8a7f72;">${T('emptyCart')}</div>
         <button data-action="goTo" data-page="shop" style="margin-top:24px;padding:14px 32px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;cursor:pointer;">${T('goShopBtn')}</button>
@@ -355,17 +363,18 @@ function renderCheckout(d) {
     </div>`;
   }
   const s = state.shipping;
+  const wideSpan = 'var(--field-span-wide)';
   const fields = [
-    ['name', 'fieldName', 2], ['email', 'fieldEmail', 2], ['address', 'fieldAddress', 2],
-    ['city', 'fieldCity', 1], ['zip', 'fieldZip', 1], ['country', 'fieldCountry', 2],
+    ['name', 'fieldName', wideSpan], ['email', 'fieldEmail', wideSpan], ['address', 'fieldAddress', wideSpan],
+    ['city', 'fieldCity', 1], ['zip', 'fieldZip', 1], ['country', 'fieldCountry', wideSpan],
   ];
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">${T('checkoutTitle')}</div>
-    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:64px;margin-top:40px;">
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('checkoutTitle')}</div>
+    <div style="display:grid;grid-template-columns:var(--checkout-col);gap:var(--gap-xl);margin-top:40px;">
       <div>
         <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">${T('shippingInfoLabel')}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="display:grid;grid-template-columns:var(--form-cols);gap:16px;">
           ${fields.map(([f, labelKey, span]) => `<input data-field="${f}" value="${esc(s[f])}" placeholder="${T(labelKey)}" style="grid-column:span ${span};padding:14px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />`).join('')}
         </div>
 
@@ -398,8 +407,8 @@ function renderCheckout(d) {
 
 function renderAbout() {
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;">
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="display:grid;grid-template-columns:var(--two-col-even);gap:var(--gap-xl);align-items:center;">
       <div style="width:100%;aspect-ratio:4/5;overflow:hidden;background:#efe6da;">
         <svg viewBox="0 0 400 500" style="width:100%;height:100%;display:block;">
           <rect width="400" height="500" fill="#efe6da"/>
@@ -445,9 +454,9 @@ function renderContact() {
   const c = state.contact;
   const sending = state.contactStatus === 'sending';
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">${T('contactTitle')}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:40px;">
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('contactTitle')}</div>
+    <div style="display:grid;grid-template-columns:var(--two-col-even);gap:var(--gap-xl);margin-top:40px;">
       <div>
         <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">${T('directContact')}</div>
         <div style="font-size:15px;line-height:2;color:#4a3f37;">
@@ -479,10 +488,10 @@ function renderContact() {
 
 function renderReviews(d) {
   return `
-  <div style="max-width:1280px;margin:0 auto;padding:64px 48px 96px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;">${T('reviewsTitle')}</div>
+  <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-md) var(--pad-page) var(--pad-section-v-lg);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;">${T('reviewsTitle')}</div>
     <div style="font-size:14px;color:#c9a27a;margin-top:12px;">${T('reviewsPlaceholder')}</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:40px;">
+    <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);margin-top:40px;">
       ${d.reviewCards.map(() => `
         <div style="background:#efe6da;">
           <div style="width:100%;aspect-ratio:1/1;overflow:hidden;"><div class="img-slot" style="cursor:default;"><div class="img-slot-empty">客户晒单照片</div></div></div>
@@ -498,8 +507,8 @@ function renderReviews(d) {
 
 function renderFooter() {
   return `
-  <div style="background:#2b2420;color:#d8cdbd;padding:64px 48px 40px;">
-    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:48px;">
+  <div style="background:#2b2420;color:#d8cdbd;padding:var(--pad-section-v-md) var(--pad-page) 40px;">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:var(--footer-col);gap:var(--gap-lg);">
       <div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#f1e9df;">beautychoice</div>
         <div style="font-size:14px;margin-top:12px;line-height:1.7;">${T('footerTagline')}<br>${T('footerTagline2')}</div>
@@ -627,6 +636,7 @@ function openProduct(id) {
   state.detailSize = 'M';
   state.detailQty = 1;
   state.addedToast = false;
+  state.mobileNavOpen = false;
   render();
   window.scrollTo(0, 0);
 }
@@ -634,6 +644,7 @@ function openProduct(id) {
 function goCategory(cat) {
   state.categoryFilter = cat;
   state.page = 'shop';
+  state.mobileNavOpen = false;
   render();
   window.scrollTo(0, 0);
 }
@@ -679,6 +690,7 @@ app.addEventListener('click', (e) => {
     case 'openProduct': openProduct(el.dataset.id); break;
     case 'goCategory': goCategory(el.dataset.cat); break;
     case 'setLang': state.lang = el.dataset.lang; render(); break;
+    case 'toggleMobileNav': state.mobileNavOpen = !state.mobileNavOpen; render(); break;
     case 'setCategoryFilter': state.categoryFilter = el.dataset.cat; render(); break;
     case 'setSize': state.detailSize = el.dataset.size; render(); break;
     case 'incQty': state.detailQty += 1; render(); break;
