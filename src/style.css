@@ -142,3 +142,33 @@ input::placeholder, textarea::placeholder { color: #a89685; }
 
 /* ---- login box ---- */
 .login-box { width: 100%; max-width: 360px; }
+
+/* ---- homepage polish ---- */
+button, .btn-primary, .btn-ghost { transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease, transform 0.2s ease; }
+
+.btn-primary:hover { background: #2b2420 !important; color: #f8f4ef !important; }
+.btn-ghost { transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease; }
+.btn-ghost:hover { background: #fdfaf6; border-color: #fdfaf6 !important; color: #2b2420 !important; }
+
+.media-zoom { overflow: hidden; }
+.media-zoom img { transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+.card-lift:hover .media-zoom img { transform: scale(1.06); }
+.card-lift { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.card-lift:hover { transform: translateY(-3px); }
+.card-lift:hover .card-name { color: #8a6a49; }
+.card-name { transition: color 0.25s ease; }
+
+.title-rule { display: inline-block; width: 30px; height: 1px; background: #c9a27a; margin-bottom: 16px; }
+.title-rule.center { margin-left: auto; margin-right: auto; }
+
+.trust-strip { border-top: 1px solid #e3d9cc; border-bottom: 1px solid #e3d9cc; }
+.trust-strip-item { white-space: nowrap; }
+
+.quote-mark { font-family: 'Cormorant Garamond', serif; font-size: 44px; line-height: 1; color: #c9a27a; opacity: 0.7; display: block; }
+
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.reveal-visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .media-zoom img, .card-lift { transition: none; }
+}

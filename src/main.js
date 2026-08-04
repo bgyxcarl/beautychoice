@@ -119,15 +119,15 @@ function imgTile(src, alt) {
   return `<img src="${esc(src)}" alt="${esc(alt)}" style="width:100%;height:100%;object-fit:cover;display:block;" />`;
 }
 
-function productCard(p) {
+function productCard(p, extraStyle) {
   return `
-  <div data-action="openProduct" data-id="${esc(p.id)}" style="cursor:pointer;display:flex;flex-direction:column;gap:16px;width:100%;">
-    <div style="position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#efe6da;">
+  <div class="card-lift reveal" data-action="openProduct" data-id="${esc(p.id)}" style="cursor:pointer;display:flex;flex-direction:column;gap:16px;width:100%;${extraStyle || ''}">
+    <div class="media-zoom" style="position:relative;width:100%;aspect-ratio:1/1;background:#efe6da;">
       ${imgTile(p.img, p.displayName)}
     </div>
     <div>
       <div style="font-family:'Work Sans',sans-serif;font-size:12px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">${esc(p.displayCategoryLabel)}</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#2b2420;margin-top:6px;font-weight:600;">${esc(p.displayName)}</div>
+      <div class="card-name" style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#2b2420;margin-top:6px;font-weight:600;">${esc(p.displayName)}</div>
       <div style="font-family:'Work Sans',sans-serif;font-size:16px;color:#2b2420;margin-top:8px;">${esc(p.priceLabel)}</div>
     </div>
   </div>`;
@@ -172,20 +172,28 @@ function renderHeader(d) {
 
 function renderHome(d) {
   const hero = d.allProducts.find((p) => p.id === 'almond-015') || d.allProducts[0];
+  const trustItems = [T('trustItem1'), T('trustItem2'), T('trustItem3'), T('trustItem4')];
   return `
   <div>
     <div style="position:relative;width:100%;height:var(--hero-height);overflow:hidden;">
       ${hero && hero.img ? `<img src="${esc(hero.img)}" alt="beautychoice" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;" />` : ''}
-      <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(20,16,14,0) 35%, rgba(20,16,14,0.65) 100%);pointer-events:none;"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(20,16,14,0.05) 30%, rgba(20,16,14,0.72) 100%);pointer-events:none;"></div>
       <div style="position:absolute;left:var(--pad-page);right:var(--pad-page);bottom:var(--pad-header-v);max-width:560px;">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-hero);font-weight:700;line-height:1.05;color:#fdfaf6;">${T('heroTitle1')}<br>${T('heroTitle2')}</div>
+        <div style="font-size:12px;letter-spacing:0.14em;color:#e8c9a0;text-transform:uppercase;margin-bottom:14px;">${T('heroEyebrow')}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-hero);font-weight:700;line-height:1.04;letter-spacing:-0.01em;color:#fdfaf6;">${T('heroTitle1')}<br>${T('heroTitle2')}</div>
         <div style="font-size:17px;color:#f1e9df;margin-top:16px;">${T('heroSubtitle')}</div>
-        <button data-action="goTo" data-page="shop" style="margin-top:28px;padding:15px 34px;background:#c9a27a;color:#231d19;border:none;font-size:15px;font-weight:600;letter-spacing:0.02em;cursor:pointer;">${T('heroButton')}</button>
+        <button class="btn-primary" data-action="goTo" data-page="shop" style="margin-top:28px;padding:15px 34px;background:#c9a27a;color:#231d19;border:none;font-size:14px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;">${T('heroButton')} →</button>
+      </div>
+    </div>
+
+    <div class="trust-strip">
+      <div style="max-width:1280px;margin:0 auto;padding:18px var(--pad-page);display:flex;justify-content:center;flex-wrap:wrap;gap:10px 28px;">
+        ${trustItems.map((t) => `<div class="trust-strip-item" style="font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#8a7f72;">${esc(t)}</div>`).join('<div style="color:#d8cdbd;">·</div>')}
       </div>
     </div>
 
     <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-lg) var(--pad-page) var(--pad-section-v-md);">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--gap-md);flex-wrap:wrap;gap:12px;">
+      <div class="reveal" style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--gap-md);flex-wrap:wrap;gap:12px;">
         <div>
           <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">${T('featuredLabel')}</div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;">${T('featuredTitle')}</div>
@@ -193,20 +201,23 @@ function renderHome(d) {
         <a href="#" data-action="goTo" data-page="shop" style="font-size:14px;">${T('viewAll')}</a>
       </div>
       <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);">
-        ${d.featuredProducts.map(productCard).join('')}
+        ${d.featuredProducts.map((p, i) => productCard(p, `transition-delay:${i * 90}ms;`)).join('')}
       </div>
     </div>
 
     <div style="background:#efe6da;padding:var(--pad-section-v-lg) var(--pad-page);">
       <div style="max-width:1280px;margin:0 auto;">
-        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;text-align:center;">${T('categoryLabel')}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;text-align:center;">${T('categoryTitle')}</div>
+        <div class="reveal" style="text-align:center;">
+          <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">${T('categoryLabel')}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;">${T('categoryTitle')}</div>
+          <div class="title-rule center" style="margin-top:16px;"></div>
+        </div>
         <div style="display:grid;grid-template-columns:var(--cols-4);gap:var(--gap-md);margin-top:var(--gap-lg);">
-          ${d.categoryCards.map((c) => `
-            <div data-action="goCategory" data-cat="${c.key}" style="cursor:pointer;background:#f8f4ef;">
-              <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">${imgTile(c.thumb, c.label)}</div>
+          ${d.categoryCards.map((c, i) => `
+            <div class="card-lift reveal" data-action="goCategory" data-cat="${c.key}" style="cursor:pointer;background:#f8f4ef;transition-delay:${i * 90}ms;">
+              <div class="media-zoom" style="width:100%;aspect-ratio:1/1;">${imgTile(c.thumb, c.label)}</div>
               <div style="padding:18px;">
-                <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;">${esc(c.label)}</div>
+                <div class="card-name" style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;">${esc(c.label)}</div>
                 <div style="font-size:13px;color:#8a7f72;margin-top:4px;">${c.count}${T('unitCount')}</div>
               </div>
             </div>`).join('')}
@@ -215,13 +226,18 @@ function renderHome(d) {
     </div>
 
     <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-lg) var(--pad-page);">
-      <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;text-align:center;">${T('reviewsLabel')}</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;text-align:center;">${T('reviewsTitle')}</div>
+      <div class="reveal" style="text-align:center;">
+        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">${T('reviewsLabel')}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;">${T('reviewsTitle')}</div>
+        <div class="title-rule center" style="margin-top:16px;"></div>
+      </div>
       <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);margin-top:var(--gap-lg);">
-        ${d.teaserReviews.map((r) => `
-          <div style="background:#efe6da;padding:32px;">
-            <div style="font-size:15px;color:#4a3f37;line-height:1.6;">${esc(r.quote)}</div>
-            <div style="font-size:13px;color:#8a7f72;margin-top:16px;">${esc(r.name)}</div>
+        ${d.teaserReviews.map((r, i) => `
+          <div class="reveal" style="background:#fff;border:1px solid #e3d9cc;padding:36px 32px 32px;transition-delay:${i * 90}ms;">
+            <span class="quote-mark">"</span>
+            <div style="font-size:15px;color:#4a3f37;line-height:1.6;margin-top:4px;">${esc(r.quote)}</div>
+            <div style="font-size:13px;color:#c9a27a;margin-top:18px;letter-spacing:0.05em;">★★★★★</div>
+            <div style="font-size:13px;color:#8a7f72;margin-top:6px;">${esc(r.name)}</div>
           </div>`).join('')}
       </div>
       <div style="text-align:center;margin-top:40px;">
@@ -570,6 +586,27 @@ function render() {
   if (state.page === 'checkout' && !state.orderPlaced && d.cartCount > 0 && paypalConfigured) {
     mountPayPalButtons(d);
   }
+  mountScrollReveal();
+}
+
+// ---- scroll reveal ----
+let revealObserver = null;
+function mountScrollReveal() {
+  const els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    els.forEach((el) => el.classList.add('reveal-visible'));
+    return;
+  }
+  if (revealObserver) revealObserver.disconnect();
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  els.forEach((el) => revealObserver.observe(el));
 }
 
 // ---- PayPal ----

@@ -13,6 +13,11 @@ export const CATEGORIES = [
 
 export const UI_STRINGS = {
   promoBar: { zh: '全场满 {amt} 免运费 · 支持 PayPal / 信用卡付款', en: 'Free shipping over {amt} · PayPal / Card accepted', fr: 'Livraison gratuite dès {amt} · PayPal / Carte acceptés' },
+  heroEyebrow: { zh: 'WINNIPEG, CANADA · 个人精选品牌', en: 'WINNIPEG, CANADA · INDEPENDENT BRAND', fr: 'WINNIPEG, CANADA · MARQUE INDÉPENDANTE' },
+  trustItem1: { zh: '小批量甄选', en: 'Small-batch curated', fr: 'Sélection en petite quantité' },
+  trustItem2: { zh: '亲自试戴挑选', en: 'Personally tried & chosen', fr: 'Essayé et choisi personnellement' },
+  trustItem3: { zh: '加拿大发货', en: 'Ships from Canada', fr: 'Expédié du Canada' },
+  trustItem4: { zh: '安全便捷支付', en: 'Secure checkout', fr: 'Paiement sécurisé' },
   navHome: { zh: '首页', en: 'Home', fr: 'Accueil' },
   navShop: { zh: '全部商品', en: 'Shop All', fr: 'Boutique' },
   navAbout: { zh: '关于我', en: 'About', fr: 'À propos' },
