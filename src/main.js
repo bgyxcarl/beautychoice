@@ -20,6 +20,7 @@ const state = {
   categoryFilter: 'all',
   selectedProductId: null,
   detailSize: 'M',
+  detailImageIndex: 0,
   detailQty: 1,
   addedToast: false,
   orderPlaced: false,
@@ -79,6 +80,7 @@ function getDerived() {
     displayName: nameFor(p),
     displayDesc: descFor(p),
     displayCategoryLabel: catLabelFor(p),
+    galleryImages: (p.images && p.images.length ? p.images : (p.img ? [p.img] : [])),
   }));
 
   const uniqueCategories = [];
@@ -299,7 +301,16 @@ function renderProduct(d) {
       <a href="#" data-action="goTo" data-page="home">${T('breadcrumbHome')}</a> / <a href="#" data-action="goTo" data-page="shop">${T('shopTitle')}</a> / ${esc(p.displayName)}
     </div>
     <div style="display:grid;grid-template-columns:var(--two-col);gap:var(--gap-xl);margin-top:32px;">
-      <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">${imgTile(p.img, p.displayName)}</div>
+      <div>
+        <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">${imgTile(p.galleryImages[state.detailImageIndex] || p.img, p.displayName)}</div>
+        ${p.galleryImages.length > 1 ? `
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+          ${p.galleryImages.map((url, i) => `
+            <div data-action="setDetailImage" data-index="${i}" style="width:64px;height:64px;overflow:hidden;cursor:pointer;border:${i === state.detailImageIndex ? '2px solid #c9a27a' : '1px solid #e3d9cc'};box-sizing:border-box;">
+              <img src="${esc(url)}" alt="${esc(p.displayName)}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            </div>`).join('')}
+        </div>` : ''}
+      </div>
       <div>
         <div style="font-size:13px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">${esc(p.displayCategoryLabel)}</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-page-title);font-weight:600;margin-top:10px;">${esc(p.displayName)}</div>
@@ -810,6 +821,7 @@ function openProduct(id) {
   state.selectedProductId = id;
   state.detailSize = 'M';
   state.detailQty = 1;
+  state.detailImageIndex = 0;
   state.addedToast = false;
   state.mobileNavOpen = false;
   render();
@@ -963,6 +975,7 @@ app.addEventListener('click', (e) => {
     case 'toggleMobileNav': state.mobileNavOpen = !state.mobileNavOpen; render(); break;
     case 'setCategoryFilter': state.categoryFilter = el.dataset.cat; render(); break;
     case 'setSize': state.detailSize = el.dataset.size; render(); break;
+    case 'setDetailImage': state.detailImageIndex = Number(el.dataset.index); render(); break;
     case 'incQty': state.detailQty += 1; render(); break;
     case 'decQty': state.detailQty = Math.max(1, state.detailQty - 1); render(); break;
     case 'addToCart': addToCart(); break;

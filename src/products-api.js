@@ -23,6 +23,7 @@ function rowToProduct(row) {
     nameFr: row.name_fr,
     price: Number(row.price),
     img: row.img,
+    images: Array.isArray(row.images) ? row.images : [],
     descCn: row.desc_cn,
     descEn: row.desc_en,
     descFr: row.desc_fr,
