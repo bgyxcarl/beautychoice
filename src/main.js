@@ -1,6 +1,7 @@
 import { CATEGORIES, UI_STRINGS } from './products-data.js';
 import { loadProducts } from './products-api.js';
 import { createOrder, loadOrders } from './orders-api.js';
+import { loadCart, saveCart } from './cart-api.js';
 import { loadPayPalSdk, paypalConfigured } from './paypal.js';
 import { submitContactForm, formspreeConfigured } from './formspree.js';
 import { supabaseConfigured } from './supabase-client.js';
@@ -605,6 +606,7 @@ function renderAccount(d) {
         </div>
         <div style="font-size:14px;color:#2b2420;margin-top:8px;">${summary}</div>
         <div style="font-size:14px;color:#2b2420;margin-top:6px;">${fmtPrice(Number(o.total))}</div>
+        ${o.tracking_number ? `<div style="font-size:13px;color:#6b8f6f;margin-top:6px;">${T('trackingNumberLabel')}${esc(o.tracking_number)}</div>` : ''}
       </div>`;
     }).join('')}
   </div>`;
@@ -789,6 +791,7 @@ function mountPayPalButtons() {
         }
         state.orderPlaced = true;
         state.cart = [];
+        persistCart();
         render();
       },
       onError: (err) => {
@@ -821,6 +824,21 @@ function goCategory(cat) {
   window.scrollTo(0, 0);
 }
 
+function mergeCartItems(a, b) {
+  const merged = a.map((x) => ({ ...x }));
+  b.forEach((item) => {
+    const idx = merged.findIndex((m) => m.id === item.id && m.size === item.size);
+    if (idx >= 0) merged[idx].qty += item.qty;
+    else merged.push({ ...item });
+  });
+  return merged;
+}
+
+function persistCart() {
+  if (!state.session) return;
+  saveCart(state.session.user.id, state.cart).catch((e) => console.error('Failed to save cart:', e));
+}
+
 let toastTimer = null;
 function addToCart() {
   const product = state.products.find((p) => p.id === state.selectedProductId);
@@ -832,6 +850,7 @@ function addToCart() {
   else state.cart.push({ id: product.id, size, qty });
   state.orderPlaced = false;
   state.addedToast = true;
+  persistCart();
   render();
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { state.addedToast = false; render(); }, 1800);
@@ -897,6 +916,7 @@ function changeEmail() {
 async function logout() {
   await signOut();
   state.session = null;
+  state.cart = [];
   goTo('home');
 }
 
@@ -946,9 +966,9 @@ app.addEventListener('click', (e) => {
     case 'incQty': state.detailQty += 1; render(); break;
     case 'decQty': state.detailQty = Math.max(1, state.detailQty - 1); render(); break;
     case 'addToCart': addToCart(); break;
-    case 'cartInc': { const i = Number(el.dataset.index); state.cart[i].qty += 1; render(); break; }
-    case 'cartDec': { const i = Number(el.dataset.index); state.cart[i].qty = Math.max(1, state.cart[i].qty - 1); render(); break; }
-    case 'cartRemove': { const i = Number(el.dataset.index); state.cart.splice(i, 1); render(); break; }
+    case 'cartInc': { const i = Number(el.dataset.index); state.cart[i].qty += 1; persistCart(); render(); break; }
+    case 'cartDec': { const i = Number(el.dataset.index); state.cart[i].qty = Math.max(1, state.cart[i].qty - 1); persistCart(); render(); break; }
+    case 'cartRemove': { const i = Number(el.dataset.index); state.cart.splice(i, 1); persistCart(); render(); break; }
     case 'sendMessage': sendMessage(); break;
     case 'loginGoogle': loginGoogle(); break;
     case 'sendCode': sendCode(); break;
@@ -991,13 +1011,25 @@ async function init() {
 
   state.session = await getSession();
   if (state.session && !state.shipping.email) state.shipping.email = state.session.user.email || '';
+  if (state.session) await syncCartOnLogin();
   render();
 
   onAuthStateChange((session) => {
     const wasLoggedIn = !!state.session;
     state.session = session;
     if (session && !state.shipping.email) state.shipping.email = session.user.email || '';
+    if (session && !wasLoggedIn) syncCartOnLogin().then(render);
     render();
     if (session && !wasLoggedIn && state.page === 'account') loadMyOrdersIntoState();
   });
+}
+
+async function syncCartOnLogin() {
+  try {
+    const remoteCart = await loadCart();
+    state.cart = mergeCartItems(remoteCart, state.cart);
+    persistCart();
+  } catch (e) {
+    console.error('Failed to load saved cart:', e);
+  }
 }

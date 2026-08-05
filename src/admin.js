@@ -1,6 +1,6 @@
 import { CATEGORIES } from './products-data.js';
 import { loadProducts, addProduct, updateProduct, deleteProduct } from './products-api.js';
-import { loadOrders, setOrderStatus } from './orders-api.js';
+import { loadOrders, setOrderStatus, setOrderTracking } from './orders-api.js';
 import { supabase, supabaseConfigured } from './supabase-client.js';
 
 const app = document.getElementById('app');
@@ -286,6 +286,10 @@ function renderOrdersTab() {
         <div style="font-size:13px;color:#8a7f72;">PayPal 订单号：${esc(o.paypal_order_id || '-')} · 总计 CA$${Number(o.total).toFixed(2)}</div>
         <button data-action="toggleOrderStatus" data-id="${esc(o.id)}" data-current="${esc(o.status)}" style="padding:8px 14px;background:${shipped ? '#efe6da' : '#2b2420'};color:${shipped ? '#2b2420' : '#f8f4ef'};border:none;font-size:12px;font-weight:600;cursor:pointer;">${shipped ? '已发货' : '标记为已发货'}</button>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <span style="font-size:12px;color:#8a7f72;white-space:nowrap;">物流单号</span>
+        <input data-field="trackingNumber" data-id="${esc(o.id)}" value="${esc(o.tracking_number || '')}" placeholder="填写后客户可在「我的订单」看到" style="flex:1;min-width:160px;padding:8px 10px;border:1px solid #e3d9cc;background:#fff;font-size:13px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
+      </div>
     </div>`;
   }).join('');
 
@@ -396,6 +400,13 @@ app.addEventListener('change', (e) => {
   if (!field) return;
   if (field === 'newCategory') { state.newCategory = t.value; return; }
   const id = t.dataset.id;
+  if (field === 'trackingNumber' && id) {
+    setOrderTracking(id, t.value.trim() || null).then(() => {
+      const o = state.orders.find((x) => x.id === id);
+      if (o) o.tracking_number = t.value.trim() || null;
+    }).catch((err) => { console.error(err); alert('更新失败：' + err.message); });
+    return;
+  }
   if (field === 'category' && id) {
     const cat = CATEGORIES.find((c) => c.key === t.value);
     setField(id, 'category', t.value).then(() => {

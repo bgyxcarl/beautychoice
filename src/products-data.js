@@ -126,4 +126,5 @@ export const UI_STRINGS = {
   noOrdersYet: { zh: '还没有订单，去逛逛吧。', en: "No orders yet — let's find something you'll love.", fr: "Aucune commande pour l'instant — allez faire un tour dans la boutique." },
   orderStatusPending: { zh: '处理中', en: 'Processing', fr: 'En traitement' },
   orderStatusShipped: { zh: '已发货', en: 'Shipped', fr: 'Expédiée' },
+  trackingNumberLabel: { zh: '物流单号：', en: 'Tracking number: ', fr: 'Numéro de suivi : ' },
 };

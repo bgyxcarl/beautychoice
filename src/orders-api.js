@@ -31,3 +31,8 @@ export async function setOrderStatus(id, status) {
   const { error } = await supabase.from('orders').update({ status }).eq('id', id);
   if (error) throw error;
 }
+
+export async function setOrderTracking(id, trackingNumber) {
+  const { error } = await supabase.from('orders').update({ tracking_number: trackingNumber }).eq('id', id);
+  if (error) throw error;
+}
