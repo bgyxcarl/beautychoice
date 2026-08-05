@@ -5,7 +5,7 @@ import { loadCart, saveCart } from './cart-api.js';
 import { loadPayPalSdk, paypalConfigured } from './paypal.js';
 import { submitContactForm, formspreeConfigured } from './formspree.js';
 import { supabaseConfigured } from './supabase-client.js';
-import { getSession, onAuthStateChange, sendEmailCode, verifyEmailCode, signInWithGoogle, signOut, setMarketingOptIn } from './auth.js';
+import { getSession, onAuthStateChange, sendEmailCode, verifyEmailCode, signInWithGoogle, signOut, setMarketingOptIn, saveShippingProfile } from './auth.js';
 import { TERMS_HTML, PRIVACY_HTML } from './legal-content.js';
 
 const app = document.getElementById('app');
@@ -70,7 +70,7 @@ function nameFor(p) { return state.lang === 'zh' ? p.name : state.lang === 'en' 
 function descFor(p) { return state.lang === 'zh' ? p.descCn : state.lang === 'en' ? p.descEn : p.descFr; }
 function catLabelFor(p) { return state.lang === 'zh' ? p.categoryLabel : state.lang === 'en' ? p.categoryLabelEn : p.categoryLabelFr; }
 
-const SHIPPING_FLAT = 0; // TEMP: shipping disabled for testing — restore before real launch
+const SHIPPING_FLAT = 6;
 const FREE_SHIP_THRESHOLD = 80;
 
 function getDerived() {
@@ -111,25 +111,12 @@ function getDerived() {
   const totalNum = subtotalNum + shippingNum;
   const totalLabel = fmtPrice(totalNum);
 
-  const teaserReviews = state.lang === 'zh' ? [
-    { quote: '甲片贴合度很好，戴了一周边缘都没有翘起，摘下来指甲也完好。', name: '@momo' },
-    { quote: '尺码选对了直接能戴，客服回复很快，选款的时候帮我推荐了合适的甲型。', name: '@xiaotu' },
-    { quote: '细节比照片看到的还精致，镶嵌的部分很牢固，送人也很拿得出手。', name: '@ruru' },
-  ] : state.lang === 'en' ? [
-    { quote: 'Great fit — wore it a full week with no lifting, and my natural nails were fine after removal.', name: '@momo' },
-    { quote: 'Picked the right size and it just worked. The seller helped me choose the shape too.', name: '@xiaotu' },
-    { quote: 'Detail is even nicer in person, and the gems stay firmly in place. Great gift too.', name: '@ruru' },
-  ] : [
-    { quote: 'Excellent tenue — portés une semaine entière sans décollement, mes ongles naturels intacts.', name: '@momo' },
-    { quote: "J'ai choisi la bonne taille et tout s'est bien passé, la vendeuse m'a aidée à choisir la forme.", name: '@xiaotu' },
-    { quote: "Les détails sont encore plus beaux en vrai, les pierres tiennent bien. Idéal en cadeau aussi.", name: '@ruru' },
-  ];
   const reviewCards = Array.from({ length: 6 }, (_, i) => ({ slotId: 'review-' + i }));
 
   return {
     allProducts, categoryFilters, filteredShopProducts, featuredProducts, categoryCards,
     selectedProduct, sameCategoryProducts, cartLines, subtotalNum, cartCount, shippingNum, shippingLabel, totalNum, totalLabel, isFreeShip,
-    teaserReviews, reviewCards,
+    reviewCards,
   };
 }
 
@@ -247,26 +234,6 @@ function renderHome(d) {
               </div>
             </div>`).join('')}
         </div>
-      </div>
-    </div>
-
-    <div style="max-width:1280px;margin:0 auto;padding:var(--pad-section-v-lg) var(--pad-page);">
-      <div class="reveal" style="text-align:center;">
-        <div style="font-size:13px;color:#8a7f72;letter-spacing:0.08em;text-transform:uppercase;">${T('reviewsLabel')}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:var(--font-section-title);font-weight:600;margin-top:8px;">${T('reviewsTitle')}</div>
-        <div class="title-rule center" style="margin-top:16px;"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:var(--cols-3);gap:var(--gap-lg);margin-top:var(--gap-lg);">
-        ${d.teaserReviews.map((r, i) => `
-          <div class="reveal" style="background:#fff;border:1px solid #e3d9cc;padding:36px 32px 32px;transition-delay:${i * 90}ms;">
-            <span class="quote-mark">"</span>
-            <div style="font-size:15px;color:#4a3f37;line-height:1.6;margin-top:4px;">${esc(r.quote)}</div>
-            <div style="font-size:13px;color:#c9a27a;margin-top:18px;letter-spacing:0.05em;">★★★★★</div>
-            <div style="font-size:13px;color:#8a7f72;margin-top:6px;">${esc(r.name)}</div>
-          </div>`).join('')}
-      </div>
-      <div style="text-align:center;margin-top:40px;">
-        <a href="#" data-action="goTo" data-page="reviews" style="font-size:14px;">${T('viewAllReviews')}</a>
       </div>
     </div>
   </div>`;
@@ -800,6 +767,9 @@ function mountPayPalButtons() {
         } catch (e) {
           console.error('Payment succeeded but failed to record order in Supabase:', e);
         }
+        if (state.session) {
+          saveShippingProfile(state.shipping).catch((e) => console.error('Failed to save shipping profile:', e));
+        }
         state.orderPlaced = true;
         state.cart = [];
         persistCart();
@@ -1023,18 +993,28 @@ async function init() {
   }
 
   state.session = await getSession();
-  if (state.session && !state.shipping.email) state.shipping.email = state.session.user.email || '';
+  if (state.session) applySessionToShipping(state.session);
   if (state.session) await syncCartOnLogin();
   render();
 
   onAuthStateChange((session) => {
     const wasLoggedIn = !!state.session;
     state.session = session;
-    if (session && !state.shipping.email) state.shipping.email = session.user.email || '';
+    if (session) applySessionToShipping(session);
     if (session && !wasLoggedIn) syncCartOnLogin().then(render);
     render();
     if (session && !wasLoggedIn && state.page === 'account') loadMyOrdersIntoState();
   });
+}
+
+function applySessionToShipping(session) {
+  if (!state.shipping.email) state.shipping.email = session.user.email || '';
+  const saved = session.user.user_metadata && session.user.user_metadata.last_shipping;
+  if (saved) {
+    ['name', 'address', 'city', 'zip', 'country'].forEach((f) => {
+      if (!state.shipping[f] && saved[f]) state.shipping[f] = saved[f];
+    });
+  }
 }
 
 async function syncCartOnLogin() {

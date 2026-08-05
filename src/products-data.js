@@ -82,7 +82,7 @@ export const UI_STRINGS = {
   aboutNote: { zh: 'Winnipeg, Canada', en: 'Winnipeg, Canada', fr: 'Winnipeg, Canada' },
   contactTitle: { zh: '联系方式', en: 'Contact', fr: 'Contact' },
   directContact: { zh: '直接联系', en: 'Get in Touch', fr: 'Nous Contacter' },
-  emailValue: { zh: '邮箱：hello@beautychoice.example', en: 'Email: hello@beautychoice.example', fr: 'E-mail : hello@beautychoice.example' },
+  emailValue: { zh: '邮箱：beautychoicebymm@gmail.com', en: 'Email: beautychoicebymm@gmail.com', fr: 'E-mail : beautychoicebymm@gmail.com' },
   replyTime: { zh: '回复时间：工作日 24 小时内', en: 'Reply time: within 24 hours on weekdays', fr: 'Délai de réponse : sous 24h en semaine' },
   socialLabel: { zh: '社交主页', en: 'Social', fr: 'Réseaux Sociaux' },
   messageLabel: { zh: '留言', en: 'Send a Message', fr: 'Envoyer un Message' },

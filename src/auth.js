@@ -41,3 +41,9 @@ export async function setMarketingOptIn(optIn) {
   const { error } = await supabase.auth.updateUser({ data: { marketing_opt_in: optIn } });
   if (error) throw error;
 }
+
+export async function saveShippingProfile(shipping) {
+  const { name, address, city, zip, country } = shipping;
+  const { error } = await supabase.auth.updateUser({ data: { last_shipping: { name, address, city, zip, country } } });
+  if (error) throw error;
+}
