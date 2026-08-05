@@ -24,6 +24,7 @@ const state = {
   newCategory: CATEGORIES[0].key,
   newPrice: 25,
   uploadingId: null,
+  expandedIds: new Set(),
 
   orders: [],
   ordersLoading: false,
@@ -91,6 +92,8 @@ async function deleteRow(id) {
   }
 }
 
+let newProductImageFile = null;
+
 async function submitNewProduct() {
   const cat = CATEGORIES.find((c) => c.key === state.newCategory) || CATEGORIES[0];
   if (!cat) return;
@@ -113,6 +116,11 @@ async function submitNewProduct() {
     state.newName = '';
     state.newPrice = 25;
     render();
+    if (newProductImageFile) {
+      const file = newProductImageFile;
+      newProductImageFile = null;
+      await handleImageFile(created.id, file);
+    }
   } catch (e) {
     console.error('Failed to add product:', e);
     alert('添加失败：' + e.message);
@@ -198,12 +206,17 @@ function renderProductsTab() {
   const filterTabs = [{ key: 'all', label: '全部' }, ...CATEGORIES]
     .map((f) => `<div data-action="setCategoryFilter" data-cat="${f.key}" style="cursor:pointer;font-size:14px;color:${f.key === state.categoryFilter ? '#c9a27a' : '#2b2420'};font-weight:${f.key === state.categoryFilter ? 700 : 500};white-space:nowrap;">${esc(f.label)}</div>`).join('');
 
-  const rows = filtered.map((p) => `
-    <div class="admin-row-min" style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 80px;gap:16px;padding:14px 0;border-bottom:1px solid #ece3d6;align-items:center;">
+  const rows = filtered.map((p) => {
+    const expanded = state.expandedIds.has(p.id);
+    return `
+    <div class="admin-row-min" style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 132px;gap:16px;padding:14px 0;${expanded ? '' : 'border-bottom:1px solid #ece3d6;'}align-items:center;">
       <div style="width:56px;height:56px;overflow:hidden;background:#efe6da;">${imgCell(p)}</div>
       <div>
-        <input data-field="name" data-id="${esc(p.id)}" value="${esc(p.name)}" style="width:100%;padding:8px 10px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
-        <div style="font-size:11px;color:#a89685;margin-top:4px;padding-left:2px;">${esc(p.nameEn)} · ${esc(p.nameFr)}</div>
+        <input data-field="name" data-id="${esc(p.id)}" value="${esc(p.name)}" placeholder="中文名称" style="width:100%;padding:8px 10px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
+        <div style="display:flex;gap:6px;margin-top:4px;">
+          <input data-field="nameEn" data-id="${esc(p.id)}" value="${esc(p.nameEn)}" placeholder="English name" style="flex:1;min-width:0;padding:6px 8px;border:1px solid #e3d9cc;background:#fff;font-size:12px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
+          <input data-field="nameFr" data-id="${esc(p.id)}" value="${esc(p.nameFr)}" placeholder="Nom français" style="flex:1;min-width:0;padding:6px 8px;border:1px solid #e3d9cc;background:#fff;font-size:12px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
+        </div>
       </div>
       <select data-field="category" data-id="${esc(p.id)}" style="padding:10px;border:1px solid #e3d9cc;background:#fff;font-size:13px;font-family:'Work Sans',sans-serif;">
         ${CATEGORIES.map((c) => `<option value="${c.key}" ${c.key === p.category ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}
@@ -212,8 +225,30 @@ function renderProductsTab() {
         <span style="font-size:13px;color:#8a7f72;">CA$</span>
         <input type="number" data-field="price" data-id="${esc(p.id)}" value="${p.price}" style="width:70px;padding:10px;border:1px solid #e3d9cc;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;" />
       </div>
-      <button data-action="deleteRow" data-id="${esc(p.id)}" style="padding:8px 14px;background:none;border:1px solid #e3d9cc;font-size:13px;color:#8a4a3f;cursor:pointer;">删除</button>
-    </div>`).join('');
+      <div style="display:flex;gap:6px;">
+        <button data-action="toggleDetails" data-id="${esc(p.id)}" style="padding:8px 10px;background:none;border:1px solid #e3d9cc;font-size:12px;color:#2b2420;cursor:pointer;white-space:nowrap;">${expanded ? '收起' : '详情'}</button>
+        <button data-action="deleteRow" data-id="${esc(p.id)}" style="padding:8px 10px;background:none;border:1px solid #e3d9cc;font-size:12px;color:#8a4a3f;cursor:pointer;">删除</button>
+      </div>
+    </div>
+    ${expanded ? `
+    <div class="admin-row-min" style="padding:0 0 20px;border-bottom:1px solid #ece3d6;">
+      <div style="font-size:12px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">商品简介（三语）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:11px;color:#a89685;margin-bottom:4px;">中文</div>
+          <textarea data-field="descCn" data-id="${esc(p.id)}" rows="3" style="width:100%;padding:8px;border:1px solid #e3d9cc;background:#fff;font-size:13px;font-family:'Work Sans',sans-serif;box-sizing:border-box;resize:vertical;">${esc(p.descCn)}</textarea>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#a89685;margin-bottom:4px;">English</div>
+          <textarea data-field="descEn" data-id="${esc(p.id)}" rows="3" style="width:100%;padding:8px;border:1px solid #e3d9cc;background:#fff;font-size:13px;font-family:'Work Sans',sans-serif;box-sizing:border-box;resize:vertical;">${esc(p.descEn)}</textarea>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#a89685;margin-bottom:4px;">Français</div>
+          <textarea data-field="descFr" data-id="${esc(p.id)}" rows="3" style="width:100%;padding:8px;border:1px solid #e3d9cc;background:#fff;font-size:13px;font-family:'Work Sans',sans-serif;box-sizing:border-box;resize:vertical;">${esc(p.descFr)}</textarea>
+        </div>
+      </div>
+    </div>` : ''}`;
+  }).join('');
 
   return `
     <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;">
@@ -242,18 +277,22 @@ function renderProductsTab() {
           <div style="font-size:12px;color:#8a7f72;margin-bottom:6px;">价格 (CAD)</div>
           <input type="number" data-field="newPrice" value="${state.newPrice}" style="width:100%;padding:12px;border:1px solid #d8cdbd;background:#fff;font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;" />
         </div>
+        <div>
+          <div style="font-size:12px;color:#8a7f72;margin-bottom:6px;">商品图片（可选，也可以之后再上传）</div>
+          <input type="file" accept="image/*" data-role="newProductImage" style="width:100%;padding:10px 0;font-size:13px;font-family:'Work Sans',sans-serif;" />
+        </div>
       </div>
       <div style="margin-top:20px;display:flex;gap:12px;">
         <button data-action="submitNewProduct" style="padding:12px 26px;background:#c9a27a;color:#231d19;border:none;font-size:14px;font-weight:600;cursor:pointer;">添加商品</button>
         <button data-action="toggleAddForm" style="padding:12px 26px;background:none;border:1px solid #d8cdbd;font-size:14px;cursor:pointer;">取消</button>
       </div>
-      <div style="font-size:12px;color:#8a7f72;margin-top:14px;">添加后可在下方列表的图片格里直接拖拽上传商品实拍图。</div>
+      <div style="font-size:12px;color:#8a7f72;margin-top:14px;">名称/分类/价格/图片都支持之后在下方列表里随时修改；点"详情"还能补英文、法文名称和三语简介。</div>
     </div>` : ''}
 
     <div style="display:flex;gap:20px;margin-top:32px;border-bottom:1px solid #e3d9cc;padding-bottom:16px;flex-wrap:wrap;">${filterTabs}</div>
 
     <div class="admin-table-scroll" style="margin-top:8px;">
-      <div class="admin-row-min" style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 80px;gap:16px;padding:14px 0;border-bottom:1px solid #e3d9cc;font-size:12px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">
+      <div class="admin-row-min" style="display:grid;grid-template-columns:64px 2fr 1.4fr 1fr 132px;gap:16px;padding:14px 0;border-bottom:1px solid #e3d9cc;font-size:12px;color:#8a7f72;letter-spacing:0.05em;text-transform:uppercase;">
         <div>图片</div><div>名称</div><div>分类</div><div>价格</div><div>操作</div>
       </div>
       ${rows}
@@ -358,6 +397,13 @@ app.addEventListener('click', (e) => {
     case 'toggleAddForm': state.showAddForm = !state.showAddForm; render(); break;
     case 'submitNewProduct': submitNewProduct(); break;
     case 'deleteRow': deleteRow(el.dataset.id); break;
+    case 'toggleDetails': {
+      const id = el.dataset.id;
+      if (state.expandedIds.has(id)) state.expandedIds.delete(id);
+      else state.expandedIds.add(id);
+      render();
+      break;
+    }
     case 'toggleOrderStatus': {
       const id = el.dataset.id;
       const next = el.dataset.current === 'shipped' ? 'pending' : 'shipped';
@@ -382,6 +428,11 @@ app.addEventListener('input', (e) => {
   const id = t.dataset.id;
   if (!id) return;
   if (field === 'name') setField(id, 'name', t.value);
+  else if (field === 'nameEn') setField(id, 'nameEn', t.value);
+  else if (field === 'nameFr') setField(id, 'nameFr', t.value);
+  else if (field === 'descCn') setField(id, 'descCn', t.value);
+  else if (field === 'descEn') setField(id, 'descEn', t.value);
+  else if (field === 'descFr') setField(id, 'descFr', t.value);
   else if (field === 'price') setField(id, 'price', Number(t.value) || 0);
 });
 
@@ -394,6 +445,10 @@ app.addEventListener('change', (e) => {
   if (t.dataset.role === 'imginput') {
     const file = t.files && t.files[0];
     handleImageFile(t.dataset.id, file);
+    return;
+  }
+  if (t.dataset.role === 'newProductImage') {
+    newProductImageFile = (t.files && t.files[0]) || null;
     return;
   }
   const field = t.dataset.field;
